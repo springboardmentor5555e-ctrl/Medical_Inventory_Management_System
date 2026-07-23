@@ -1,0 +1,87 @@
+-- Alter users table
+ALTER TABLE users ADD COLUMN IF NOT EXISTS status VARCHAR(255) DEFAULT 'PENDING';
+ALTER TABLE users ADD COLUMN IF NOT EXISTS owner_id BIGINT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS pharmacy_name VARCHAR(255);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS address VARCHAR(255);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS city VARCHAR(255);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS phone VARCHAR(255);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS gst_number VARCHAR(255);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS drug_license_number VARCHAR(255);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS bank_details VARCHAR(255);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS upi_id VARCHAR(255);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS qr_code_url VARCHAR(255);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS cash_enabled BOOLEAN DEFAULT TRUE;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS card_enabled BOOLEAN DEFAULT FALSE;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS upi_enabled BOOLEAN DEFAULT FALSE;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS phonepe_enabled BOOLEAN DEFAULT FALSE;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS paytm_enabled BOOLEAN DEFAULT FALSE;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS gpay_enabled BOOLEAN DEFAULT FALSE;
+
+-- Ensure default admin is approved
+UPDATE users SET status = 'APPROVED' WHERE email = 'admin@medistock.com';
+
+-- Partition existing tables by owner_id
+ALTER TABLE medicines ADD COLUMN IF NOT EXISTS owner_id BIGINT;
+ALTER TABLE categories ADD COLUMN IF NOT EXISTS owner_id BIGINT;
+ALTER TABLE reorder_requests ADD COLUMN IF NOT EXISTS owner_id BIGINT;
+ALTER TABLE sales ADD COLUMN IF NOT EXISTS owner_id BIGINT;
+
+-- Sales details additions
+ALTER TABLE sales ADD COLUMN IF NOT EXISTS discount_amount DOUBLE PRECISION DEFAULT 0.0;
+ALTER TABLE sales ADD COLUMN IF NOT EXISTS tax_amount DOUBLE PRECISION DEFAULT 0.0;
+ALTER TABLE sales ADD COLUMN IF NOT EXISTS payment_method VARCHAR(255) DEFAULT 'CASH';
+ALTER TABLE sales ADD COLUMN IF NOT EXISTS customer_id BIGINT;
+ALTER TABLE sales ADD COLUMN IF NOT EXISTS coupon_code VARCHAR(255);
+
+-- Update suppliers table
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS user_id BIGINT;
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS owner_id BIGINT;
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS gst_number VARCHAR(255);
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS drug_license_number VARCHAR(255);
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS status VARCHAR(255) DEFAULT 'PENDING';
+
+-- Target notification specific users
+ALTER TABLE notifications ADD COLUMN IF NOT EXISTS user_id BIGINT;
+
+-- Create coupons table
+CREATE TABLE IF NOT EXISTS coupons (
+    id BIGSERIAL PRIMARY KEY,
+    code VARCHAR(255) UNIQUE NOT NULL,
+    type VARCHAR(255) NOT NULL,
+    value DOUBLE PRECISION NOT NULL,
+    minimum_amount DOUBLE PRECISION DEFAULT 0.0,
+    expiry_date DATE,
+    max_usage INTEGER,
+    used_count INTEGER DEFAULT 0,
+    max_users INTEGER,
+    owner_id BIGINT,
+    active BOOLEAN DEFAULT TRUE
+);
+
+-- Create partnerships table
+CREATE TABLE IF NOT EXISTS partnerships (
+    id BIGSERIAL PRIMARY KEY,
+    pharmacy_owner_id BIGINT NOT NULL,
+    supplier_id BIGINT NOT NULL,
+    status VARCHAR(255) NOT NULL DEFAULT 'PENDING',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create chat_messages table
+CREATE TABLE IF NOT EXISTS chat_messages (
+    id BIGSERIAL PRIMARY KEY,
+    sender_id BIGINT NOT NULL,
+    receiver_id BIGINT NOT NULL,
+    content TEXT,
+    message_type VARCHAR(255) NOT NULL DEFAULT 'TEXT',
+    file_url VARCHAR(255),
+    is_read BOOLEAN DEFAULT FALSE,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create wishlists table
+CREATE TABLE IF NOT EXISTS wishlists (
+    id BIGSERIAL PRIMARY KEY,
+    customer_id BIGINT NOT NULL,
+    medicine_id BIGINT NOT NULL
+);

@@ -1,0 +1,28 @@
+# IntelliJ
+.idea/
+*.iml
+
+# Java / Spring Boot
+backend/target/
+*.class
+
+# Maven
+.mvn/
+
+# React / Vite
+medistock-frontend/node_modules/
+medistock-frontend/dist/
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
+
+# Environment Variables
+.env
+.env.local
+
+# OS Files
+.DS_Store
+Thumbs.db

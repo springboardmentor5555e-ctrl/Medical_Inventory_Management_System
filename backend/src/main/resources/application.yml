@@ -1,0 +1,57 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: medistock
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/medistock
+    username: postgres
+    password: "180506"
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: placeholder-id
+            client-secret: placeholder-secret
+            scope:
+              - email
+              - profile
+
+app:
+  jwt:
+    secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+    expiration-ms: 86400000
+
+  cloudinary:
+    cloud-name: placeholder
+    api-key: placeholder
+    api-secret: placeholder
+
+  twilio:
+    account-sid: placeholder
+    auth-token: placeholder
+    whatsapp-number: "whatsapp:+919927672353"
+    recipient-number: "whatsapp:+919927672353"
+
+logging:
+  level:
+    org.springframework.security: INFO
+    org.hibernate.SQL: DEBUG
