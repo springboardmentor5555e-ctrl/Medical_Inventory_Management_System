@@ -3,8 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeToggle from './ThemeToggle';
-import NotificationPanel from './NotificationPanel';
-import { getUnreadCount } from '../services/api';
+import { getUnreadCount, changePassword } from '../services/api';
 import {
   PackageOpen,
   LayoutDashboard,
@@ -18,6 +17,15 @@ import {
   BarChart2,
   ShoppingCart,
   Bell,
+  KeyRound,
+  X,
+  LockKeyhole,
+  Eye,
+  EyeOff,
+  AlertCircle,
+  CheckCircle2,
+  Loader2,
+  Search,
 } from 'lucide-react';
 
 const navItems = [
@@ -37,11 +45,139 @@ const roleColors = {
   STAFF:      { dot: 'bg-emerald-400',pill: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20' },
 };
 
+/* ── Inline Change Password Modal ───────────────────────────── */
+const SidebarChangePasswordModal = ({ onClose }) => {
+  const [current, setCurrent] = useState('');
+  const [next, setNext]       = useState('');
+  const [showC, setShowC]     = useState(false);
+  const [showN, setShowN]     = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError]     = useState('');
+  const [success, setSuccess] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError(''); setSuccess(''); setLoading(true);
+    try {
+      await changePassword({ currentPassword: current, newPassword: next });
+      setSuccess('Password updated successfully!');
+      setCurrent(''); setNext('');
+    } catch (err) {
+      setError(err.response?.data || 'Failed to update password.');
+    }
+    setLoading(false);
+  };
+
+  const EyeBtn = ({ show, toggle }) => (
+    <button type="button" onClick={toggle}
+      className="p-1 rounded hover:bg-white/10 transition-colors"
+      style={{ color: 'var(--text-disabled)' }}>
+      {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+    </button>
+  );
+
+  const inputStyle = {
+    background: 'var(--bg-surface)',
+    border: '1px solid var(--border-input)',
+    color: 'var(--text-primary)',
+    outline: 'none',
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(6px)' }}>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        className="glass-card rounded-2xl p-6 w-full max-w-md"
+        style={{ border: '1px solid var(--border-subtle)' }}
+      >
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center border"
+              style={{ background: 'rgba(168,85,247,0.1)', borderColor: 'rgba(168,85,247,0.25)' }}>
+              <KeyRound className="w-4 h-4 text-purple-400" />
+            </div>
+            <div>
+              <h2 className="text-base font-bold" style={{ color: 'var(--text-primary)' }}>Change Password</h2>
+              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Update your account password</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/5 transition-colors"
+            style={{ color: 'var(--text-muted)' }}>
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        <AnimatePresence>
+          {error && (
+            <motion.div initial={{ opacity:0,height:0 }} animate={{ opacity:1,height:'auto' }} exit={{ opacity:0,height:0 }}
+              className="overflow-hidden mb-4">
+              <div className="flex items-center gap-2 p-3 rounded-xl text-sm border"
+                style={{ background:'rgba(239,68,68,0.07)', borderColor:'rgba(239,68,68,0.22)', color:'#f87171' }}>
+                <AlertCircle className="w-4 h-4 flex-shrink-0" /><span>{error}</span>
+              </div>
+            </motion.div>
+          )}
+          {success && (
+            <motion.div initial={{ opacity:0,height:0 }} animate={{ opacity:1,height:'auto' }} exit={{ opacity:0,height:0 }}
+              className="overflow-hidden mb-4">
+              <div className="flex items-center gap-2 p-3 rounded-xl text-sm border"
+                style={{ background:'rgba(52,211,153,0.07)', borderColor:'rgba(52,211,153,0.25)', color:'#34d399' }}>
+                <CheckCircle2 className="w-4 h-4 flex-shrink-0" /><span>{success}</span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {[{ label: 'Current Password', val: current, set: setCurrent, show: showC, toggle: () => setShowC(v=>!v) },
+            { label: 'New Password (min 6 chars)', val: next, set: setNext, show: showN, toggle: () => setShowN(v=>!v) }
+          ].map(({ label, val, set, show, toggle }) => (
+            <div key={label} className="space-y-1.5">
+              <label className="block text-xs font-semibold tracking-widest uppercase"
+                style={{ color: 'var(--text-muted)' }}>{label}</label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none"
+                  style={{ color: 'var(--text-disabled)' }}>
+                  <LockKeyhole className="w-4 h-4" />
+                </span>
+                <input type={show ? 'text' : 'password'} required value={val}
+                  onChange={e => set(e.target.value)}
+                  className="w-full pl-10 pr-10 py-3 rounded-xl text-sm"
+                  style={inputStyle} />
+                <span className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                  <EyeBtn show={show} toggle={toggle} />
+                </span>
+              </div>
+            </div>
+          ))}
+          <div className="flex gap-3 pt-1">
+            <button type="button" onClick={onClose}
+              className="flex-1 py-3 rounded-xl border text-sm font-semibold"
+              style={{ borderColor:'var(--border-default)', color:'var(--text-muted)', background:'var(--bg-surface)' }}>
+              Cancel
+            </button>
+            <button type="submit" disabled={loading}
+              className="flex-1 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-colors"
+              style={{ background:'linear-gradient(135deg,rgba(168,85,247,0.25),rgba(99,102,241,0.2))',
+                border:'1px solid rgba(168,85,247,0.4)', color:'#c084fc' }}>
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Update Password'}
+            </button>
+          </div>
+        </form>
+      </motion.div>
+    </div>
+  );
+};
+
 const Sidebar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const [navUnread, setNavUnread] = useState(0);
+  const [showChangePwd, setShowChangePwd] = useState(false);
 
   // Poll unread count for the sidebar badge
   useEffect(() => {
@@ -164,8 +300,8 @@ const Sidebar = () => {
                       ${isActive ? 'text-sky-400' : 'text-[var(--text-muted)] group-hover:text-[var(--text-secondary)]'}
                     `}
                   />
-                  {/* Unread badge on Notifications nav item */}
-                  {item.to === '/notifications' && navUnread > 0 && (
+                  {/* Unread badge on Notifications nav item (collapsed mode only) */}
+                  {collapsed && item.to === '/notifications' && navUnread > 0 && (
                     <span
                       className="absolute -top-1.5 -right-1.5 min-w-[14px] h-3.5 px-[3px] rounded-full flex items-center justify-center text-[8px] font-bold text-white pointer-events-none"
                       style={{ background: 'linear-gradient(135deg, #ef4444, #f97316)' }}
@@ -189,16 +325,16 @@ const Sidebar = () => {
                   )}
                 </AnimatePresence>
 
-                {/* Unread count label (expanded sidebar only) */}
+                {/* Unread count pill (expanded sidebar only) */}
                 {!collapsed && item.to === '/notifications' && navUnread > 0 && (
                   <span
-                    className="ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0"
+                    className="ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 text-white"
                     style={{
-                      background: isActive ? 'rgba(239,68,68,0.15)' : 'rgba(239,68,68,0.10)',
-                      color: '#f87171',
+                      background: 'linear-gradient(135deg, #ef4444, #f97316)',
+                      boxShadow: '0 2px 6px rgba(239,68,68,0.3)',
                     }}
                   >
-                    {navUnread}
+                    {navUnread > 99 ? '99+' : navUnread}
                   </span>
                 )}
 
@@ -227,24 +363,6 @@ const Sidebar = () => {
       {/* ── Footer ────────────────────────────────────── */}
       <div className={`flex-shrink-0 ${collapsed ? 'px-2' : 'px-3'} pb-4 pt-2 space-y-1`}
         style={{ borderTop: '1px solid var(--border-nav)' }}>
-
-        {/* Notifications */}
-        <div className={`flex items-center ${collapsed ? 'justify-center px-0 py-1' : 'gap-3 px-1 py-1'}`}>
-          <NotificationPanel />
-          <AnimatePresence>
-            {!collapsed && (
-              <motion.span
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="text-[13px] font-medium whitespace-nowrap"
-                style={{ color: 'var(--text-muted)' }}
-              >
-                Notifications
-              </motion.span>
-            )}
-          </AnimatePresence>
-        </div>
 
         {/* Theme Toggle */}
         <ThemeToggle collapsed={collapsed} />
@@ -275,7 +393,29 @@ const Sidebar = () => {
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* Change Password quick button (expanded only) */}
+          <AnimatePresence>
+            {!collapsed && (
+              <motion.button
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setShowChangePwd(true)}
+                title="Change Password"
+                className="flex-shrink-0 p-1.5 rounded-lg border transition-all duration-200 hover:scale-105 group"
+                style={{ background: 'rgba(168,85,247,0.07)', borderColor: 'rgba(168,85,247,0.2)', color: '#c084fc' }}
+              >
+                <KeyRound className="w-3.5 h-3.5" />
+              </motion.button>
+            )}
+          </AnimatePresence>
         </div>
+
+        {/* Change Password Modal */}
+        <AnimatePresence>
+          {showChangePwd && <SidebarChangePasswordModal onClose={() => setShowChangePwd(false)} />}
+        </AnimatePresence>
 
         {/* Logout */}
         <button

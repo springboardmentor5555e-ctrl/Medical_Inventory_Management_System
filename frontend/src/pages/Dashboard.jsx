@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import Layout from '../components/Layout';
 import StatCard from '../components/StatCard';
+import StatDetailModal from '../components/StatDetailModal';
 import { getDashboardStats, getAnalytics } from '../services/api';
 import { motion } from 'framer-motion';
 import {
@@ -290,10 +291,11 @@ const Dashboard = () => {
   const [statsLoading, setStatsLoading] = useState(true);
   const [analytics, setAnalytics]       = useState(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(true);
+  const [selectedStatModal, setSelectedStatModal] = useState(null);
 
   useEffect(() => {
     setStatsLoading(true);
-    getDashboardStats(10, 30)
+    getDashboardStats(10, 90)
       .then((res) => setStats(res.data))
       .catch(() => setStats(null))
       .finally(() => setStatsLoading(false));
@@ -311,18 +313,18 @@ const Dashboard = () => {
       { label: 'Suppliers',     desc: 'Manage supplier contacts and partnerships.',      icon: Truck,      color: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400', path: '/suppliers' },
       { label: 'Inventory',     desc: 'Add, edit, and manage medicines across batches.', icon: Layers,     color: 'bg-purple-500/10 border-purple-500/20 text-purple-400',   path: '/inventory' },
       { label: 'Low Stock',     desc: 'View medicines running below threshold.',         icon: ShieldAlert,color: 'bg-amber-500/10 border-amber-500/20 text-amber-400',      path: '/inventory?filter=lowStock' },
-      { label: 'Expiring Soon', desc: 'View medicines expiring within 30 days.',         icon: Calendar,   color: 'bg-rose-500/10 border-rose-500/20 text-rose-400',        path: '/inventory?filter=expiring' },
+      { label: 'Expiring Soon', desc: 'View medicines expiring within next 3 months (90 days).', icon: Calendar, color: 'bg-rose-500/10 border-rose-500/20 text-rose-400', path: '/inventory?filter=expiring' },
     ],
     PHARMACIST: [
       { label: 'Inventory',     desc: 'Manage stock levels and add new medicines.',      icon: Package,    color: 'bg-sky-500/10 border-sky-500/20 text-sky-400',            path: '/inventory' },
       { label: 'Low Stock',     desc: 'View medicines running below threshold.',         icon: ShieldAlert,color: 'bg-amber-500/10 border-amber-500/20 text-amber-400',      path: '/inventory?filter=lowStock' },
-      { label: 'Expiring Soon', desc: 'View medicines expiring within 30 days.',         icon: Calendar,   color: 'bg-rose-500/10 border-rose-500/20 text-rose-400',        path: '/inventory?filter=expiring' },
+      { label: 'Expiring Soon', desc: 'View medicines expiring within next 3 months (90 days).', icon: Calendar, color: 'bg-rose-500/10 border-rose-500/20 text-rose-400', path: '/inventory?filter=expiring' },
       { label: 'Suppliers',     desc: 'View and manage supplier records.',               icon: Truck,      color: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400', path: '/suppliers' },
     ],
     STAFF: [
       { label: 'Browse Inventory', desc: 'Search medicines and check quantities.',   icon: Search,     color: 'bg-sky-500/10 border-sky-500/20 text-sky-400',       path: '/inventory' },
       { label: 'Low Stock',        desc: 'View medicines running below threshold.',  icon: ShieldAlert,color: 'bg-amber-500/10 border-amber-500/20 text-amber-400', path: '/inventory?filter=lowStock' },
-      { label: 'Expiring Soon',    desc: 'View medicines expiring within 30 days.', icon: Activity,   color: 'bg-rose-500/10 border-rose-500/20 text-rose-400',   path: '/inventory?filter=expiring' },
+      { label: 'Expiring Soon',    desc: 'View medicines expiring within next 3 months (90 days).', icon: Activity, color: 'bg-rose-500/10 border-rose-500/20 text-rose-400', path: '/inventory?filter=expiring' },
     ],
   };
 
@@ -364,7 +366,8 @@ const Dashboard = () => {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.2 }}
-                  className="flex items-center gap-1.5 text-xs font-semibold text-purple-400 bg-purple-500/10 border border-purple-500/20 px-3 py-1.5 rounded-full"
+                  onClick={() => setSelectedStatModal({ statKey: 'inventoryValue', statValue: formatCurrency(analytics.totalInventoryValue) })}
+                  className="flex items-center gap-1.5 text-xs font-semibold text-purple-400 bg-purple-500/10 border border-purple-500/20 px-3 py-1.5 rounded-full cursor-pointer hover:bg-purple-500/20 transition-all duration-200"
                 >
                   <DollarSign className="w-3 h-3" />
                   {formatCurrency(analytics.totalInventoryValue)} value
@@ -397,9 +400,33 @@ const Dashboard = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-              <StatCard icon={Package}       value={stats?.totalMedicines ?? '—'} label="Total Medicines"  sublabel="Active inventory records"  color="sky"   delay={0}    onClick={() => navigate('/inventory')} />
-              <StatCard icon={AlertTriangle} value={stats?.lowStockCount  ?? '—'} label="Low Stock Alerts" sublabel="Quantity at or below 10"    color="amber" delay={0.08} onClick={() => navigate('/inventory?filter=lowStock')} />
-              <StatCard icon={Calendar}      value={stats?.expiringCount  ?? '—'} label="Expiring Soon"    sublabel="Within the next 30 days"    color="rose"  delay={0.16} onClick={() => navigate('/inventory?filter=expiring')} />
+              <StatCard
+                icon={Package}
+                value={stats?.totalMedicines ?? '—'}
+                label="Total Medicines"
+                sublabel="Active inventory records"
+                color="sky"
+                delay={0}
+                onClick={() => setSelectedStatModal({ statKey: 'totalMedicines', statValue: stats?.totalMedicines })}
+              />
+              <StatCard
+                icon={AlertTriangle}
+                value={stats?.lowStockCount ?? '—'}
+                label="Low Stock Alerts"
+                sublabel="Quantity at or below 10"
+                color="amber"
+                delay={0.08}
+                onClick={() => setSelectedStatModal({ statKey: 'lowStockCount', statValue: stats?.lowStockCount })}
+              />
+              <StatCard
+                icon={Calendar}
+                value={stats?.expiringCount ?? '—'}
+                label="Expiring Soon"
+                sublabel="Within next 3 months (90 days)"
+                color="rose"
+                delay={0.16}
+                onClick={() => setSelectedStatModal({ statKey: 'expiringCount', statValue: stats?.expiringCount })}
+              />
             </div>
           )}
         </div>
@@ -551,6 +578,14 @@ const Dashboard = () => {
             ))}
           </div>
         </div>
+
+        {/* ── Stat Detail Modal ───────────────────────── */}
+        <StatDetailModal
+          isOpen={!!selectedStatModal}
+          statKey={selectedStatModal?.statKey}
+          statValue={selectedStatModal?.statValue}
+          onClose={() => setSelectedStatModal(null)}
+        />
 
       </div>
     </Layout>

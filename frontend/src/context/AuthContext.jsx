@@ -57,13 +57,14 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const registerUser = async (username, email, password, role) => {
+  const registerUser = async (username, email, password, role, phoneNumber) => {
     try {
       await axios.post('http://localhost:8080/api/auth/register', {
         username,
         email,
         password,
         role,
+        phoneNumber,
       });
       return { success: true };
     } catch (error) {

@@ -21,6 +21,8 @@ public interface MedicineRepository extends JpaRepository<Medicine, Long> {
 
     Page<Medicine> findByCategoryId(Long categoryId, Pageable pageable);
 
+    List<Medicine> findBySupplierId(Long supplierId);
+
     @Query("SELECT m FROM Medicine m WHERE " +
            "(:name = '' OR LOWER(m.name) LIKE LOWER(CONCAT('%', :name, '%'))) AND " +
            "(:categoryId = -1L OR m.category.id = :categoryId)")

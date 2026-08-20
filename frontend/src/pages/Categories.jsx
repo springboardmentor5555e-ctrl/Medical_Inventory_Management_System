@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { getCategories, createCategory, updateCategory, deleteCategory } from '../services/api';
 import {
   Tag, Plus, Edit2, Trash2, X, Loader2, RefreshCw, AlertTriangle
 } from 'lucide-react';
-import { AnimatePresence } from 'framer-motion';
 
 const CategoryFormModal = ({ isOpen, onClose, onSubmit, initialData = null }) => {
   const [name, setName] = useState('');
@@ -41,64 +40,66 @@ const CategoryFormModal = ({ isOpen, onClose, onSubmit, initialData = null }) =>
     }
   };
 
+  if (!isOpen) return null;
+
   return (
     <AnimatePresence>
-      {isOpen && (
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        style={{ backgroundColor: 'rgba(2, 6, 23, 0.75)', backdropFilter: 'blur(8px)' }}
+        onClick={onClose}
+      >
         <motion.div
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ backgroundColor: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)' }}
-          onClick={onClose}
+          initial={{ opacity: 0, scale: 0.92, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.92, y: 20 }}
+          transition={{ duration: 0.2 }}
+          className="rounded-2xl w-full max-w-sm border border-[var(--border-default)] shadow-2xl overflow-hidden"
+          style={{ background: 'var(--bg-elevated)', color: 'var(--text-primary)' }}
+          onClick={(e) => e.stopPropagation()}
         >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.92, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.92, y: 20 }}
-            transition={{ duration: 0.2 }}
-            className="glass-card rounded-2xl w-full max-w-sm border border-slate-700/60"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800/70">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-indigo-500/15 flex items-center justify-center border border-indigo-500/25">
-                  <Tag className="w-4 h-4 text-indigo-400" />
-                </div>
-                <h2 className="font-bold text-slate-100">{initialData ? 'Edit Category' : 'New Category'}</h2>
+          <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-subtle)] bg-[var(--bg-surface)]">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-indigo-500/15 flex items-center justify-center border border-indigo-500/25">
+                <Tag className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
               </div>
-              <button onClick={onClose} className="text-slate-500 hover:text-slate-300 transition-colors">
-                <X className="w-5 h-5" />
-              </button>
+              <h2 className="font-bold" style={{ color: 'var(--text-primary)' }}>
+                {initialData ? 'Edit Category' : 'New Category'}
+              </h2>
+            </div>
+            <button onClick={onClose} className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
+            {error && (
+              <div className="text-red-500 bg-red-950/20 border border-red-500/30 p-3 rounded-xl text-xs">{error}</div>
+            )}
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: 'var(--text-muted)' }}>Name *</label>
+              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Antibiotics"
+                className="glass-input w-full px-3 py-2.5 rounded-xl text-sm outline-none" required />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: 'var(--text-muted)' }}>Description</label>
+              <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Brief description..."
+                rows={3} className="glass-input w-full px-3 py-2.5 rounded-xl text-sm outline-none resize-none" />
             </div>
 
-            <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
-              {error && (
-                <div className="text-red-400 bg-red-950/20 border border-red-500/30 p-3 rounded-xl text-xs">{error}</div>
-              )}
-              <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Name *</label>
-                <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Antibiotics"
-                  className="glass-input w-full px-3 py-2.5 rounded-xl text-sm outline-none" required />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Description</label>
-                <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Brief description..."
-                  rows={3} className="glass-input w-full px-3 py-2.5 rounded-xl text-sm outline-none resize-none" />
-              </div>
-            </form>
-
-            <div className="flex gap-3 px-6 py-4 border-t border-slate-800/70">
-              <button onClick={onClose} className="flex-1 py-2.5 text-sm font-medium rounded-xl border border-slate-700 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition-all">
+            <div className="flex gap-3 pt-2">
+              <button type="button" onClick={onClose} className="btn-ghost flex-1 py-2.5 text-sm">
                 Cancel
               </button>
-              <button onClick={handleSubmit} disabled={loading}
-                className="flex-1 py-2.5 text-sm font-semibold rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white transition-all flex items-center justify-center gap-2 disabled:opacity-60">
+              <button type="submit" disabled={loading}
+                className="btn-primary flex-1 py-2.5 text-sm flex items-center justify-center gap-2">
                 {loading && <Loader2 className="w-4 h-4 animate-spin" />}
                 {initialData ? 'Save Changes' : 'Create'}
               </button>
             </div>
-          </motion.div>
+          </form>
         </motion.div>
-      )}
+      </div>
     </AnimatePresence>
   );
 };
@@ -118,7 +119,7 @@ const Categories = () => {
     setLoading(true);
     try {
       const res = await getCategories();
-      setCategories(res.data);
+      setCategories(res.data || []);
     } catch { setCategories([]); }
     finally { setLoading(false); }
   };
@@ -148,20 +149,25 @@ const Categories = () => {
   return (
     <Layout>
       <div className="p-6 lg:p-8 max-w-4xl mx-auto">
+        {/* Header */}
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
           className="flex items-center justify-between mb-8">
           <div>
             <div className="flex items-center gap-3 mb-1">
               <div className="w-9 h-9 rounded-xl bg-indigo-500/15 flex items-center justify-center border border-indigo-500/25">
-                <Tag className="w-5 h-5 text-indigo-400" />
+                <Tag className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
               </div>
-              <h1 className="text-2xl font-extrabold tracking-tight text-white">Categories</h1>
+              <h1 className="text-2xl font-extrabold tracking-tight" style={{ color: 'var(--text-primary)' }}>
+                Categories
+              </h1>
             </div>
-            <p className="text-sm text-slate-400 ml-12">{categories.length} categor{categories.length !== 1 ? 'ies' : 'y'} configured</p>
+            <p className="text-sm ml-12" style={{ color: 'var(--text-muted)' }}>
+              {categories.length} categor{categories.length !== 1 ? 'ies' : 'y'} configured
+            </p>
           </div>
           {isAdmin && (
             <button onClick={() => setFormModal({ open: true, data: null })}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white text-sm font-semibold shadow-lg transition-all">
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white text-sm font-semibold shadow-lg shadow-indigo-500/20 transition-all">
               <Plus className="w-4 h-4" />
               New Category
             </button>
@@ -169,24 +175,24 @@ const Categories = () => {
         </motion.div>
 
         {error && (
-          <div className="mb-4 text-red-400 bg-red-950/20 border border-red-500/30 p-3 rounded-xl text-sm flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4" />
-            {error}
-            <button onClick={() => setError('')} className="ml-auto text-xs text-slate-500 hover:text-slate-300">Dismiss</button>
+          <div className="mb-4 text-red-500 bg-red-950/20 border border-red-500/30 p-3.5 rounded-xl text-sm flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+            <span>{error}</span>
+            <button onClick={() => setError('')} className="ml-auto text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)]">Dismiss</button>
           </div>
         )}
 
         {loading ? (
-          <div className="flex items-center justify-center py-20 text-slate-500 gap-2">
-            <RefreshCw className="w-4 h-4 animate-spin" /> Loading...
+          <div className="flex items-center justify-center py-20 gap-2" style={{ color: 'var(--text-muted)' }}>
+            <RefreshCw className="w-4 h-4 animate-spin text-indigo-400" /> Loading categories...
           </div>
         ) : categories.length === 0 ? (
-          <div className="glass-card rounded-2xl border border-slate-800/60 p-16 text-center">
-            <Tag className="w-10 h-10 mx-auto mb-3 text-slate-600" />
-            <p className="text-slate-500">No categories yet</p>
+          <div className="glass-card rounded-2xl border border-[var(--border-default)] p-16 text-center">
+            <Tag className="w-10 h-10 mx-auto mb-3 opacity-50" style={{ color: 'var(--text-muted)' }} />
+            <p className="font-semibold" style={{ color: 'var(--text-secondary)' }}>No categories yet</p>
             {isAdmin && (
               <button onClick={() => setFormModal({ open: true, data: null })}
-                className="mt-3 text-indigo-400 text-xs hover:text-indigo-300">
+                className="mt-3 text-indigo-500 hover:text-indigo-400 text-xs font-medium">
                 + Create your first category
               </button>
             )}
@@ -199,28 +205,32 @@ const Categories = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05 }}
                 onClick={() => navigate(`/inventory?category=${cat.id}`)}
-                className="glass-card rounded-2xl p-5 border border-slate-800/60 hover:border-indigo-500/20 transition-all group cursor-pointer"
+                className="glass-card rounded-2xl p-5 border border-[var(--border-default)] hover:border-indigo-500/40 hover:shadow-lg transition-all group cursor-pointer"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="w-2 h-2 rounded-full bg-indigo-400 flex-shrink-0" />
-                      <h3 className="font-bold text-slate-200 truncate">{cat.name}</h3>
+                    <div className="flex items-center gap-2.5 mb-1.5">
+                      <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 flex-shrink-0 shadow-sm shadow-indigo-500/30" />
+                      <h3 className="font-bold text-base tracking-tight truncate" style={{ color: 'var(--text-primary)' }}>
+                        {cat.name}
+                      </h3>
                     </div>
-                    <p className="text-xs text-slate-500 ml-4">
-                      {cat.description || <span className="italic text-slate-600">No description</span>}
+                    <p className="text-xs ml-5 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                      {cat.description || <span className="italic opacity-60">No description provided</span>}
                     </p>
                   </div>
                   {isAdmin && (
                     <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
                       <button
                         onClick={(e) => { e.stopPropagation(); setFormModal({ open: true, data: cat }); }}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-sky-400 hover:bg-sky-500/10 transition-all">
+                        className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-sky-500 hover:bg-sky-500/10 transition-all"
+                        title="Edit Category">
                         <Edit2 className="w-3.5 h-3.5" />
                       </button>
                       <button
                         onClick={(e) => { e.stopPropagation(); setDeleteDialog(cat); }}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                        className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 transition-all"
+                        title="Delete Category">
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>

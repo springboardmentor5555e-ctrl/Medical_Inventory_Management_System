@@ -12,32 +12,32 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  /* Dark theme (default) */
-  --bg-base:        #020817;
-  --bg-surface:     #0c1428;
-  --bg-elevated:    #111827;
-  --bg-card:        rgba(15, 23, 42, 0.70);
-  --bg-input:       rgba(15, 23, 42, 0.80);
-  --bg-sidebar:     #080f1e;
+  /* Dark theme (default: Midnight Obsidian) */
+  --bg-base:        #030712;
+  --bg-surface:     #0b1120;
+  --bg-elevated:    #111c33;
+  --bg-card:        rgba(15, 23, 42, 0.72);
+  --bg-input:       rgba(15, 23, 42, 0.85);
+  --bg-sidebar:     #070d1a;
 
-  --border-subtle:  rgba(148, 163, 184, 0.08);
-  --border-default: rgba(148, 163, 184, 0.12);
-  --border-input:   rgba(148, 163, 184, 0.14);
+  --border-subtle:  rgba(148, 163, 184, 0.09);
+  --border-default: rgba(148, 163, 184, 0.14);
+  --border-input:   rgba(148, 163, 184, 0.18);
   --border-focus:   #38bdf8;
-  --border-nav:     rgba(148, 163, 184, 0.08);
+  --border-nav:     rgba(148, 163, 184, 0.09);
 
-  --text-primary:   #f1f5f9;
+  --text-primary:   #f8fafc;
   --text-secondary: #94a3b8;
-  --text-muted:     #475569;
+  --text-muted:     #64748b;
   --text-disabled:  #334155;
 
-  --grid-line:      rgba(255, 255, 255, 0.025);
+  --grid-line:      rgba(255, 255, 255, 0.028);
 
   --shadow-xs:      0 1px 2px 0 rgba(0,0,0,0.4);
   --shadow-sm:      0 2px 8px 0 rgba(0,0,0,0.35);
-  --shadow-card:    0 4px 24px 0 rgba(0,0,0,0.5), 0 1px 3px 0 rgba(0,0,0,0.3);
-  --shadow-modal:   0 25px 50px -12px rgba(0,0,0,0.7);
-  --shadow-glow:    0 0 0 3px rgba(56,189,248,0.18);
+  --shadow-card:    0 4px 24px 0 rgba(0,0,0,0.45), 0 1px 3px 0 rgba(0,0,0,0.25);
+  --shadow-modal:   0 25px 50px -12px rgba(0,0,0,0.8);
+  --shadow-glow:    0 0 0 3px rgba(56,189,248,0.20);
 
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -50,33 +50,33 @@
   --transition-slow: 400ms cubic-bezier(0.4,0,0.2,1);
 }
 
-/* Light theme — Sandalwood */
+/* Light theme — Modern Clinical Sandalwood & Crisp Ivory */
 .light {
-  --bg-base:        #fdf8f3;   /* warm cream */
-  --bg-surface:     #f5ede2;   /* soft sand */
-  --bg-elevated:    #fffbf7;   /* warm white */
-  --bg-card:        rgba(255, 251, 247, 0.88);
-  --bg-input:       rgba(255, 251, 247, 0.96);
-  --bg-sidebar:     #fffaf5;   /* lightest sand */
+  --bg-base:        #f8fafc;
+  --bg-surface:     #f1f5f9;
+  --bg-elevated:    #ffffff;
+  --bg-card:        rgba(255, 255, 255, 0.92);
+  --bg-input:       #ffffff;
+  --bg-sidebar:     #ffffff;
 
-  --border-subtle:  rgba(139, 100, 60, 0.07);
-  --border-default: rgba(139, 100, 60, 0.13);
-  --border-input:   rgba(139, 100, 60, 0.18);
-  --border-focus:   #c07d3a;   /* warm amber */
-  --border-nav:     rgba(139, 100, 60, 0.09);
+  --border-subtle:  rgba(15, 23, 42, 0.06);
+  --border-default: rgba(15, 23, 42, 0.10);
+  --border-input:   rgba(15, 23, 42, 0.15);
+  --border-focus:   #0284c7;
+  --border-nav:     rgba(15, 23, 42, 0.08);
 
-  --text-primary:   #2c1e0f;   /* deep warm brown */
-  --text-secondary: #6b4f34;   /* medium sandalwood */
-  --text-muted:     #a8866a;   /* muted tan */
-  --text-disabled:  #d4b89a;   /* pale sand */
+  --text-primary:   #0f172a;
+  --text-secondary: #334155;
+  --text-muted:     #64748b;
+  --text-disabled:  #cbd5e1;
 
-  --grid-line:      rgba(139, 100, 60, 0.05);
+  --grid-line:      rgba(15, 23, 42, 0.035);
 
-  --shadow-xs:      0 1px 2px 0 rgba(100, 60, 20, 0.06);
-  --shadow-sm:      0 2px 8px 0 rgba(100, 60, 20, 0.10);
-  --shadow-card:    0 4px 24px 0 rgba(100, 60, 20, 0.10), 0 1px 3px 0 rgba(100, 60, 20, 0.05);
-  --shadow-modal:   0 25px 50px -12px rgba(100, 60, 20, 0.22);
-  --shadow-glow:    0 0 0 3px rgba(192, 125, 58, 0.22);
+  --shadow-xs:      0 1px 2px 0 rgba(15, 23, 42, 0.04);
+  --shadow-sm:      0 2px 8px 0 rgba(15, 23, 42, 0.06);
+  --shadow-card:    0 4px 20px -2px rgba(15, 23, 42, 0.07), 0 1px 3px rgba(15, 23, 42, 0.04);
+  --shadow-modal:   0 25px 50px -12px rgba(15, 23, 42, 0.20);
+  --shadow-glow:    0 0 0 3px rgba(2, 132, 199, 0.18);
 }
 
 
@@ -304,25 +304,77 @@ textarea.glass-input { resize: none; }
 }
 
 /* ════════════════════════════════════════════════════
-   GLOW RING ON HOVER (UTILITY)
+   MODERN UI UTILITIES & GLOW SYSTEM
 ════════════════════════════════════════════════════ */
-.hover-glow {
-  transition: box-shadow var(--transition-base);
+.glow-box-sky {
+  box-shadow: 0 0 25px -4px rgba(14, 165, 233, 0.25), 0 0 10px -2px rgba(14, 165, 233, 0.15);
 }
-.hover-glow:hover {
-  box-shadow: 0 0 0 1px rgba(56,189,248,0.25), 0 8px 32px rgba(56,189,248,0.08);
+
+.glow-box-emerald {
+  box-shadow: 0 0 25px -4px rgba(16, 185, 129, 0.25), 0 0 10px -2px rgba(16, 185, 129, 0.15);
+}
+
+.glow-box-amber {
+  box-shadow: 0 0 25px -4px rgba(245, 158, 11, 0.25), 0 0 10px -2px rgba(245, 158, 11, 0.15);
+}
+
+.glow-box-rose {
+  box-shadow: 0 0 25px -4px rgba(244, 63, 94, 0.25), 0 0 10px -2px rgba(244, 63, 94, 0.15);
+}
+
+/* Pulsing Status Dot */
+.pulse-dot {
+  position: relative;
+  display: inline-flex;
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+}
+
+.pulse-dot::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 9999px;
+  background: inherit;
+  opacity: 0.6;
+  animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.9); opacity: 0.8; }
+  70%, 100% { transform: scale(2.2); opacity: 0; }
+}
+
+/* Glass Pill Badge */
+.glass-pill {
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-default);
+  border-radius: 9999px;
+  padding: 4px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all var(--transition-fast);
+}
+
+.glass-pill:hover {
+  border-color: var(--border-focus);
 }
 
 /* ════════════════════════════════════════════════════
    SCROLLBAR
 ════════════════════════════════════════════════════ */
-::-webkit-scrollbar       { width: 4px; height: 4px; }
+::-webkit-scrollbar       { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(148,163,184,0.2);
+  background: rgba(148,163,184,0.25);
   border-radius: 99px;
 }
-::-webkit-scrollbar-thumb:hover { background: rgba(148,163,184,0.35); }
+::-webkit-scrollbar-thumb:hover { background: rgba(148,163,184,0.45); }
 
 /* ════════════════════════════════════════════════════
    FRAMER-MOTION SMOOTHING

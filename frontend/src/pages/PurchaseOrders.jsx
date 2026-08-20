@@ -1,18 +1,22 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
+import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import Layout from '../components/Layout';
 import ConfirmDialog from '../components/ConfirmDialog';
 import {
   getPurchaseOrders, createPurchaseOrder, updatePurchaseOrderStatus,
-  deletePurchaseOrder, getSuppliers,
+  deletePurchaseOrder, getSuppliers, getLowStockMedicines, getMedicinesBySupplier,
+  getMedicines
 } from '../services/api';
 import {
   ShoppingCart, Plus, Trash2, X, Loader2, CheckCircle2,
   Clock, XCircle, Truck, RefreshCw, ChevronLeft, ChevronRight,
   ChevronDown, ChevronUp, Package, DollarSign,
-  AlertCircle, Hash, Search, Filter,
+  AlertCircle, Hash, Search, Filter, FileSpreadsheet, Zap, Sparkles
 } from 'lucide-react';
+import { exportPurchaseOrdersCSV } from '../utils/exportCsv';
 
 /* ── helpers ──────────────────────────────────────────────────── */
 function formatCurrency(val) {
@@ -84,12 +88,18 @@ const StatusBadge = ({ status }) => {
 };
 
 /* ── STAT CARD ────────────────────────────────────────────────── */
-const StatCard = ({ icon: Icon, value, label, sublabel, color, glow, delay = 0 }) => (
+const StatCard = ({ icon: Icon, value, label, sublabel, color, glow, delay = 0, onClick }) => (
   <motion.div
     initial={{ opacity: 0, y: 14 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay, duration: 0.35 }}
-    className="glass-card rounded-2xl p-5 relative overflow-hidden"
+    onClick={onClick}
+    role={onClick ? 'button' : undefined}
+    tabIndex={onClick ? 0 : undefined}
+    onKeyDown={onClick ? (e) => (e.key === 'Enter' || e.key === ' ') && onClick() : undefined}
+    className={`glass-card rounded-2xl p-5 relative overflow-hidden transition-all duration-200 ${
+      onClick ? 'cursor-pointer hover:-translate-y-1 hover:shadow-lg hover:border-sky-500/30' : ''
+    }`}
     style={{ border: '1px solid var(--border-subtle)' }}
   >
     <div className="absolute inset-0 pointer-events-none"
@@ -114,27 +124,107 @@ const TABS = [
 ];
 
 /* ── CREATE PO MODAL ──────────────────────────────────────────── */
-const CreatePOModal = ({ isOpen, onClose, onSubmit, suppliers }) => {
+const CreatePOModal = ({ isOpen, onClose, onSubmit, suppliers, initialData = null }) => {
   const [supplierId, setSupplierId] = useState('');
+  const [supplierCatalogue, setSupplierCatalogue] = useState([]);
   const [items, setItems] = useState([{ medicineName: '', quantity: 1, unitPrice: 0 }]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
     if (isOpen) {
-      setSupplierId(suppliers.length > 0 ? String(suppliers[0].id) : '');
-      setItems([{ medicineName: '', quantity: 1, unitPrice: 0 }]);
+      if (initialData) {
+        setSupplierId(initialData.supplierId ? String(initialData.supplierId) : (suppliers.length > 0 ? String(suppliers[0].id) : ''));
+        setItems(initialData.items && initialData.items.length > 0 ? initialData.items : [{ medicineName: '', quantity: 1, unitPrice: 0 }]);
+      } else {
+        setSupplierId(suppliers.length > 0 ? String(suppliers[0].id) : '');
+        setItems([{ medicineName: '', quantity: 1, unitPrice: 0 }]);
+      }
       setError('');
     }
-  }, [isOpen, suppliers]);
+  }, [isOpen, suppliers, initialData]);
+
+  // Load medicines supplied by the selected supplier
+  useEffect(() => {
+    if (supplierId) {
+      getMedicines({ page: 0, size: 1000 })
+        .then((res) => {
+          const list = res.data?.content || [];
+          const matched = list.filter((m) => String(m.supplierId) === String(supplierId));
+          setSupplierCatalogue(matched);
+        })
+        .catch(() => setSupplierCatalogue([]));
+    } else {
+      setSupplierCatalogue([]);
+    }
+  }, [supplierId]);
 
   const handleItemChange = (index, field, value) => {
     const newItems = [...items];
     newItems[index][field] = value;
+
+    // If medicineName was changed, check if it matches an item in the supplier's catalogue to auto-fill price
+    if (field === 'medicineName') {
+      const match = supplierCatalogue.find((m) => m.name.toLowerCase() === (value || '').toLowerCase());
+      if (match && match.price != null && match.price > 0) {
+        newItems[index].unitPrice = match.price;
+      }
+    }
+
     setItems(newItems);
   };
 
-  const addItem    = () => setItems([...items, { medicineName: '', quantity: 1, unitPrice: 0 }]);
+  const addItem = (med = null) => {
+    if (med) {
+      // Check if medicine already in list; if so, bump qty by 50
+      const existingIdx = items.findIndex((i) => (i.medicineName || '').trim().toLowerCase() === med.name.trim().toLowerCase());
+      if (existingIdx >= 0) {
+        const newItems = [...items];
+        newItems[existingIdx].quantity = (Number(newItems[existingIdx].quantity) || 0) + 50;
+        setItems(newItems);
+        return;
+      }
+
+      // If only 1 empty row, replace it
+      if (items.length === 1 && !items[0].medicineName.trim()) {
+        setItems([{ medicineName: med.name, quantity: 50, unitPrice: med.price || 0 }]);
+        return;
+      }
+
+      setItems([...items, { medicineName: med.name, quantity: 50, unitPrice: med.price || 0 }]);
+    } else {
+      setItems([...items, { medicineName: '', quantity: 1, unitPrice: 0 }]);
+    }
+  };
+
+  // Add all medicines from this supplier catalogue
+  const addAllFromCatalogue = () => {
+    if (!supplierCatalogue.length) return;
+    const existingNames = new Set(
+      items.map((i) => (i.medicineName || '').trim().toLowerCase()).filter(Boolean)
+    );
+
+    const toAdd = supplierCatalogue
+      .filter((m) => !existingNames.has((m.name || '').trim().toLowerCase()))
+      .map((m) => ({
+        medicineName: m.name,
+        quantity: 50,
+        unitPrice: m.price || 0,
+      }));
+
+    if (items.length === 1 && !items[0].medicineName.trim()) {
+      setItems(
+        supplierCatalogue.map((m) => ({
+          medicineName: m.name,
+          quantity: 50,
+          unitPrice: m.price || 0,
+        }))
+      );
+    } else if (toAdd.length > 0) {
+      setItems([...items, ...toAdd]);
+    }
+  };
+
   const removeItem = (i) => setItems(items.filter((_, idx) => idx !== i));
 
   const total = items.reduce((s, item) => s + (item.quantity * item.unitPrice), 0);
@@ -156,178 +246,250 @@ const CreatePOModal = ({ isOpen, onClose, onSubmit, suppliers }) => {
     }
   };
 
-  return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ backgroundColor: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)' }}
-          onClick={onClose}
-        >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.93, y: 24 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.93, y: 24 }}
-            transition={{ duration: 0.22 }}
-            className="glass-card rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col"
-            style={{ border: '1px solid var(--border-default)' }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4"
-              style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center">
-                  <ShoppingCart className="w-4 h-4 text-sky-400" />
-                </div>
-                <div>
-                  <h2 className="text-[15px] font-bold" style={{ color: 'var(--text-primary)' }}>Create Purchase Order</h2>
-                  <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>Add a new order for stock replenishment</p>
-                </div>
-              </div>
-              <button onClick={onClose}
-                className="w-8 h-8 rounded-xl flex items-center justify-center transition-colors"
-                style={{ color: 'var(--text-muted)' }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--border-subtle)'; e.currentTarget.style.color = 'var(--text-primary)'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-muted)'; }}
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
+  if (!isOpen) return null;
 
-            {/* Body */}
-            <div className="p-6 overflow-y-auto flex-1">
-              <form id="po-form" onSubmit={handleSubmit} className="space-y-6">
-                {error && (
-                  <div className="flex items-center gap-2.5 bg-rose-500/10 border border-rose-500/20 text-rose-400 px-4 py-3 rounded-xl text-sm">
-                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                    <p>{error}</p>
+  const modalJSX = (
+    <AnimatePresence>
+      <div
+        className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-6"
+        style={{ backgroundColor: 'rgba(2, 6, 23, 0.75)', backdropFilter: 'blur(10px)' }}
+        onClick={onClose}
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.94, y: 16 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.94, y: 16 }}
+          transition={{ duration: 0.22 }}
+          className="rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl border border-[var(--border-default)]"
+          style={{ background: 'var(--bg-elevated)', color: 'var(--text-primary)' }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-subtle)] bg-[var(--bg-surface)]">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center">
+                <ShoppingCart className="w-4 h-4 text-sky-500 dark:text-sky-400" />
+              </div>
+              <div>
+                <h2 className="text-base font-bold" style={{ color: 'var(--text-primary)' }}>Create Purchase Order</h2>
+                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Add a new order for stock replenishment</p>
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="w-8 h-8 rounded-xl flex items-center justify-center transition-colors text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--border-subtle)]"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Body */}
+          <div className="p-6 overflow-y-auto flex-1">
+            <form id="po-form" onSubmit={handleSubmit} className="space-y-5">
+              {error && (
+                <div className="flex items-center gap-2.5 bg-rose-500/10 border border-rose-500/20 text-rose-500 dark:text-rose-400 px-4 py-3 rounded-xl text-sm">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  <p>{error}</p>
+                </div>
+              )}
+
+              {/* Supplier select */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
+                    Supplier
+                  </label>
+                  {supplierCatalogue.length > 0 && (
+                    <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                      ✓ {supplierCatalogue.length} products available from this vendor
+                    </span>
+                  )}
+                </div>
+                <div className="relative">
+                  <Truck className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--text-muted)' }} />
+                  <select
+                    value={supplierId}
+                    onChange={(e) => setSupplierId(e.target.value)}
+                    className="glass-input w-full pl-10 pr-4 py-2.5 rounded-xl text-sm outline-none font-medium"
+                    required
+                  >
+                    <option value="" disabled>Select a Supplier</option>
+                    {suppliers.map((s) => (
+                      <option key={s.id} value={s.id}>{s.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Supplier catalogue quick pill adder + Select All Button */}
+                {supplierCatalogue.length > 0 && (
+                  <div className="mt-3 pt-2.5 border-t border-[var(--border-subtle)]">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[10px] uppercase font-bold tracking-wider block" style={{ color: 'var(--text-muted)' }}>
+                        Quick Add from Catalogue:
+                      </span>
+                      <button
+                        type="button"
+                        onClick={addAllFromCatalogue}
+                        className="text-xs font-bold text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300 flex items-center gap-1.5 py-1 px-2.5 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/25 transition-all shadow-sm"
+                        title="Add all medicines from this supplier to the order"
+                      >
+                        <Zap className="w-3.5 h-3.5 text-amber-500" />
+                        <span>Select All Items ({supplierCatalogue.length})</span>
+                      </button>
+                    </div>
+
+                    <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto">
+                      {supplierCatalogue.map((m) => (
+                        <button
+                          key={m.id}
+                          type="button"
+                          onClick={() => addItem(m)}
+                          className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-[var(--bg-surface)] hover:bg-sky-500/15 text-[var(--text-secondary)] hover:text-sky-600 dark:hover:text-sky-300 border border-[var(--border-default)] hover:border-sky-500/40 transition-colors flex items-center gap-1"
+                          title={`Add ${m.name} (${formatCurrency(m.price)})`}
+                        >
+                          <Plus className="w-3 h-3 text-sky-500" />
+                          <span>{m.name}</span>
+                          <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono">({formatCurrency(m.price)})</span>
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 )}
+              </div>
 
-                {/* Supplier select */}
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider mb-2"
-                    style={{ color: 'var(--text-muted)' }}>Supplier</label>
-                  <div className="relative">
-                    <Truck className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--text-muted)' }} />
-                    <select
-                      value={supplierId}
-                      onChange={(e) => setSupplierId(e.target.value)}
-                      className="glass-input w-full pl-10 pr-4 py-2.5 rounded-xl text-sm outline-none"
-                      required
-                    >
-                      <option value="" disabled>Select a Supplier</option>
-                      {suppliers.map((s) => (
-                        <option key={s.id} value={s.id}>{s.name}</option>
-                      ))}
-                    </select>
-                  </div>
+              {/* Datalist for auto-suggesting supplier medicines */}
+              <datalist id="supplier-meds-datalist">
+                {supplierCatalogue.map((m) => (
+                  <option key={m.id} value={m.name}>
+                    {formatCurrency(m.price)} | Batch: {m.batchNumber}
+                  </option>
+                ))}
+              </datalist>
+
+              {/* Items */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <label className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
+                    Order Items
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => addItem()}
+                    className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl transition-all text-sky-600 dark:text-sky-400 bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/25"
+                  >
+                    <Plus className="w-3.5 h-3.5" /> Add Blank Item
+                  </button>
                 </div>
 
-                {/* Items */}
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <label className="text-xs font-semibold uppercase tracking-wider"
-                      style={{ color: 'var(--text-muted)' }}>Order Items</label>
-                    <button type="button" onClick={addItem}
-                      className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl transition-all"
-                      style={{ color: '#38bdf8', background: 'rgba(56,189,248,0.08)', border: '1px solid rgba(56,189,248,0.2)' }}
-                      onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(56,189,248,0.15)'; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(56,189,248,0.08)'; }}
+                {/* Column headers */}
+                <div className="grid grid-cols-[1fr_80px_100px_32px] gap-2 px-1 mb-2">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Medicine</span>
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-center" style={{ color: 'var(--text-muted)' }}>Qty</span>
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-center" style={{ color: 'var(--text-muted)' }}>Unit Price (₹)</span>
+                  <span />
+                </div>
+
+                <div className="space-y-2 max-h-[30vh] overflow-y-auto">
+                  {items.map((item, idx) => (
+                    <motion.div
+                      key={idx}
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="grid grid-cols-[1fr_80px_100px_32px] gap-2 items-center p-2.5 rounded-xl border border-[var(--border-default)] bg-[var(--bg-surface)]"
                     >
-                      <Plus className="w-3 h-3" /> Add Item
-                    </button>
-                  </div>
-
-                  {/* Column headers */}
-                  <div className="grid grid-cols-[1fr_80px_100px_32px] gap-2 px-1 mb-2">
-                    <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Medicine</span>
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-center" style={{ color: 'var(--text-muted)' }}>Qty</span>
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-center" style={{ color: 'var(--text-muted)' }}>Unit Price (₹)</span>
-                    <span />
-                  </div>
-
-                  <div className="space-y-2">
-                    {items.map((item, idx) => (
-                      <motion.div
-                        key={idx}
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="grid grid-cols-[1fr_80px_100px_32px] gap-2 items-center p-3 rounded-xl"
-                        style={{ background: 'var(--border-subtle)', border: '1px solid var(--border-default)' }}
+                      <input
+                        type="text"
+                        placeholder="Medicine name…"
+                        list="supplier-meds-datalist"
+                        value={item.medicineName}
+                        onChange={(e) => handleItemChange(idx, 'medicineName', e.target.value)}
+                        className="glass-input w-full px-3 py-2 rounded-lg text-xs outline-none font-medium"
+                        required
+                      />
+                      <input
+                        type="number"
+                        min="1"
+                        placeholder="Qty"
+                        value={item.quantity}
+                        onChange={(e) => handleItemChange(idx, 'quantity', parseInt(e.target.value) || 1)}
+                        className="glass-input w-full px-2 py-2 rounded-lg text-xs text-center outline-none font-bold"
+                        required
+                      />
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        placeholder="0.00"
+                        value={item.unitPrice}
+                        onChange={(e) => handleItemChange(idx, 'unitPrice', parseFloat(e.target.value) || 0)}
+                        className="glass-input w-full px-2 py-2 rounded-lg text-xs text-center outline-none font-semibold text-emerald-600 dark:text-emerald-400"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeItem(idx)}
+                        disabled={items.length === 1}
+                        className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 disabled:opacity-20"
+                        title="Remove item"
                       >
-                        <input
-                          type="text"
-                          placeholder="Medicine name…"
-                          value={item.medicineName}
-                          onChange={(e) => handleItemChange(idx, 'medicineName', e.target.value)}
-                          className="glass-input w-full px-3 py-2 rounded-lg text-sm outline-none"
-                          required
-                        />
-                        <input
-                          type="number" min="1"
-                          placeholder="Qty"
-                          value={item.quantity}
-                          onChange={(e) => handleItemChange(idx, 'quantity', parseInt(e.target.value) || 1)}
-                          className="glass-input w-full px-2 py-2 rounded-lg text-sm text-center outline-none"
-                          required
-                        />
-                        <input
-                          type="number" min="0" step="0.01"
-                          placeholder="0.00"
-                          value={item.unitPrice}
-                          onChange={(e) => handleItemChange(idx, 'unitPrice', parseFloat(e.target.value) || 0)}
-                          className="glass-input w-full px-2 py-2 rounded-lg text-sm text-center outline-none"
-                          required
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeItem(idx)}
-                          disabled={items.length === 1}
-                          className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors disabled:opacity-20"
-                          style={{ color: 'var(--text-muted)' }}
-                          onMouseEnter={(e) => { if (items.length > 1) { e.currentTarget.style.color = '#f87171'; e.currentTarget.style.background = 'rgba(239,68,68,0.08)'; } }}
-                          onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.background = 'transparent'; }}
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      </motion.div>
-                    ))}
-                  </div>
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </motion.div>
+                  ))}
+                </div>
 
-                  {/* Running total */}
-                  <div className="flex items-center justify-between mt-4 pt-3"
-                    style={{ borderTop: '1px solid var(--border-subtle)' }}>
-                    <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                      {items.length} item{items.length !== 1 ? 's' : ''}
-                    </span>
-                    <span className="text-sm font-bold" style={{ color: '#38bdf8' }}>
-                      Total: ₹{total.toFixed(2)}
+                {/* Running total */}
+                <div className="flex items-center justify-between mt-4 pt-3 border-t border-[var(--border-subtle)]">
+                  <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                    {items.length} item{items.length !== 1 ? 's' : ''} in purchase order
+                  </span>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-xs font-semibold" style={{ color: 'var(--text-muted)' }}>Total:</span>
+                    <span className="text-base font-extrabold text-emerald-600 dark:text-emerald-400">
+                      {formatCurrency(total)}
                     </span>
                   </div>
                 </div>
-              </form>
-            </div>
+              </div>
+            </form>
+          </div>
 
-            {/* Footer */}
-            <div className="flex items-center justify-end gap-3 px-6 py-4 rounded-b-2xl"
-              style={{ borderTop: '1px solid var(--border-subtle)', background: 'var(--border-subtle)' }}>
-              <button type="button" onClick={onClose} disabled={loading} className="btn-ghost px-4 py-2 text-sm">
-                Cancel
-              </button>
-              <button form="po-form" type="submit" disabled={loading} className="btn-primary px-5 py-2 text-sm flex items-center gap-2">
-                {loading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Creating…</> : <><Plus className="w-3.5 h-3.5" /> Create Order</>}
-              </button>
-            </div>
-          </motion.div>
+          {/* Footer */}
+          <div className="flex items-center justify-end gap-3 px-6 py-4 rounded-b-2xl border-t border-[var(--border-subtle)] bg-[var(--bg-surface)]">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={loading}
+              className="px-4 py-2 text-xs font-semibold rounded-xl text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-[var(--bg-elevated)] hover:bg-[var(--border-subtle)] border border-[var(--border-default)] transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              form="po-form"
+              type="submit"
+              disabled={loading}
+              className="btn-primary px-5 py-2 text-xs font-bold flex items-center gap-2 shadow-lg shadow-sky-500/20"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" /> Creating…
+                </>
+              ) : (
+                <>
+                  <Plus className="w-3.5 h-3.5" /> Create Order
+                </>
+              )}
+            </button>
+          </div>
         </motion.div>
-      )}
+      </div>
     </AnimatePresence>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modalJSX, document.body) : modalJSX;
 };
+
 
 /* ── ORDER CARD ───────────────────────────────────────────────── */
 const OrderCard = ({ order, canWrite, canDelete, onStatusChange, onDelete, index }) => {
@@ -519,6 +681,7 @@ const OrderCard = ({ order, canWrite, canDelete, onStatusChange, onDelete, index
 /* ── MAIN PAGE ────────────────────────────────────────────────── */
 const PurchaseOrders = () => {
   const { user } = useAuth();
+  const location = useLocation();
 
   const [orders,      setOrders]      = useState([]);
   const [suppliers,   setSuppliers]   = useState([]);
@@ -528,12 +691,63 @@ const PurchaseOrders = () => {
   const [loading,     setLoading]     = useState(true);
   const [activeTab,   setActiveTab]   = useState('ALL');
   const [addModal,    setAddModal]    = useState(false);
+  const [modalInitialData, setModalInitialData] = useState(null);
+  const [autoDrafting, setAutoDrafting] = useState(false);
   const [deleteId,    setDeleteId]    = useState(null);
   const [searchQuery,     setSearchQuery]     = useState('');
   const [supplierFilter,  setSupplierFilter]  = useState('ALL');
 
   const canWrite  = ['ADMIN', 'PHARMACIST'].includes(user?.role);
   const canDelete = user?.role === 'ADMIN';
+
+  // Read status, tab, or supplier from URL query params
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tabParam = params.get('tab') || params.get('status');
+    if (tabParam && ['ALL', 'PENDING', 'RECEIVED', 'CANCELLED'].includes(tabParam.toUpperCase())) {
+      setActiveTab(tabParam.toUpperCase());
+    }
+    const supplierParam = params.get('supplier');
+    if (supplierParam) {
+      setSupplierFilter(supplierParam);
+      setModalInitialData({ supplierId: supplierParam, items: [{ medicineName: '', quantity: 1, unitPrice: 0 }] });
+      setAddModal(true);
+    }
+  }, [location.search]);
+
+  // Auto-Draft Low Stock Purchase Order
+  const handleAutoDraftLowStockOrder = async () => {
+    if (autoDrafting) return;
+    setAutoDrafting(true);
+    try {
+      const res = await getLowStockMedicines(10);
+      const lowStockList = res.data || [];
+      if (lowStockList.length === 0) {
+        alert('🎉 All medicines currently have healthy stock levels (none ≤ 10 units)!');
+        return;
+      }
+
+      // Pre-fill items with suggested re-order quantities (aiming for 50 units)
+      const draftItems = lowStockList.map((m) => ({
+        medicineName: m.name,
+        quantity: Math.max(20, 50 - (m.quantity || 0)),
+        unitPrice: m.price || 0,
+      }));
+
+      const firstSupplier = lowStockList.find((m) => m.supplierId)?.supplierId || (suppliers[0]?.id || '');
+
+      setModalInitialData({
+        supplierId: String(firstSupplier),
+        items: draftItems,
+      });
+      setAddModal(true);
+    } catch (err) {
+      console.error('Failed to auto-draft low stock order:', err);
+      alert('Failed to fetch low stock medicines for order drafting.');
+    } finally {
+      setAutoDrafting(false);
+    }
+  };
 
   const loadData = useCallback(async (pageNum = 0) => {
     setLoading(true);
@@ -624,6 +838,23 @@ const PurchaseOrders = () => {
     setActiveTab('ALL');
   };
 
+  const [csvExporting, setCsvExporting] = useState(false);
+
+  const handleExportCSV = async () => {
+    if (csvExporting) return;
+    setCsvExporting(true);
+    try {
+      const res = await getPurchaseOrders(0, 500);
+      const all = res.data?.content || [];
+      exportPurchaseOrdersCSV(all);
+    } catch (err) {
+      console.error('Failed to export purchase orders CSV:', err);
+      alert('Failed to export purchase orders CSV.');
+    } finally {
+      setCsvExporting(false);
+    }
+  };
+
   return (
     <Layout>
       <div className="p-6 lg:p-8 max-w-screen-xl mx-auto">
@@ -647,7 +878,7 @@ const PurchaseOrders = () => {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={() => loadData(page)}
               className="btn-ghost p-2.5 rounded-xl"
@@ -655,14 +886,48 @@ const PurchaseOrders = () => {
             >
               <RefreshCw className="w-4 h-4" style={{ color: 'var(--text-muted)' }} />
             </button>
+
+            <button
+              onClick={handleExportCSV}
+              disabled={csvExporting || loading}
+              className="btn-ghost flex items-center gap-2 text-sm py-2.5 px-3.5 border border-[var(--border-default)] hover:bg-[var(--border-subtle)] disabled:opacity-50"
+              title="Download Purchase Orders as CSV"
+            >
+              {csvExporting ? (
+                <Loader2 className="w-4 h-4 text-emerald-400 animate-spin" />
+              ) : (
+                <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
+              )}
+              <span>{csvExporting ? 'Exporting…' : 'Export CSV'}</span>
+            </button>
+
             {canWrite && (
-              <button
-                onClick={() => setAddModal(true)}
-                className="btn-primary px-4 py-2.5 text-sm flex items-center gap-2"
-              >
-                <Plus className="w-4 h-4" />
-                New Order
-              </button>
+              <>
+                <button
+                  onClick={handleAutoDraftLowStockOrder}
+                  disabled={autoDrafting}
+                  className="px-3.5 py-2.5 text-sm font-semibold rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 flex items-center gap-2 transition-all duration-150 disabled:opacity-50 shadow-sm"
+                  title="Automatically draft a purchase order for all low-stock medicines"
+                >
+                  {autoDrafting ? (
+                    <Loader2 className="w-4 h-4 animate-spin text-amber-400" />
+                  ) : (
+                    <Zap className="w-4 h-4 text-amber-400" />
+                  )}
+                  <span>{autoDrafting ? 'Drafting…' : 'Auto-Draft Low Stock'}</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setModalInitialData(null);
+                    setAddModal(true);
+                  }}
+                  className="btn-primary px-4 py-2.5 text-sm flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  New Order
+                </button>
+              </>
             )}
           </div>
         </motion.div>
@@ -677,6 +942,7 @@ const PurchaseOrders = () => {
             color="bg-sky-500/10 border-sky-500/20 text-sky-400"
             glow="rgba(14,165,233,0.15)"
             delay={0}
+            onClick={() => setActiveTab('ALL')}
           />
           <StatCard
             icon={Clock}
@@ -686,6 +952,7 @@ const PurchaseOrders = () => {
             color="bg-amber-500/10 border-amber-500/20 text-amber-400"
             glow="rgba(245,158,11,0.15)"
             delay={0.06}
+            onClick={() => setActiveTab('PENDING')}
           />
           <StatCard
             icon={CheckCircle2}
@@ -695,6 +962,7 @@ const PurchaseOrders = () => {
             color="bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
             glow="rgba(52,211,153,0.15)"
             delay={0.12}
+            onClick={() => setActiveTab('RECEIVED')}
           />
           <StatCard
             icon={DollarSign}
@@ -704,6 +972,7 @@ const PurchaseOrders = () => {
             color="bg-purple-500/10 border-purple-500/20 text-purple-400"
             glow="rgba(168,85,247,0.15)"
             delay={0.18}
+            onClick={() => setActiveTab('ALL')}
           />
         </div>
 
@@ -926,9 +1195,13 @@ const PurchaseOrders = () => {
       {/* ── Modals ──────────────────────────────────────────── */}
       <CreatePOModal
         isOpen={addModal}
-        onClose={() => setAddModal(false)}
+        onClose={() => {
+          setAddModal(false);
+          setModalInitialData(null);
+        }}
         onSubmit={handleCreate}
         suppliers={suppliers}
+        initialData={modalInitialData}
       />
 
       <ConfirmDialog

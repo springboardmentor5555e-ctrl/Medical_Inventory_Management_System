@@ -1,5 +1,6 @@
 import React from 'react';
 import Sidebar from './Sidebar';
+import CommandPalette from './CommandPalette';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
 
@@ -13,16 +14,19 @@ const Layout = ({ children }) => {
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}
-            initial={{ opacity: 0, y: 15, filter: 'blur(4px)' }}
-            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-            exit={{ opacity: 0, y: -15, filter: 'blur(4px)' }}
-            transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
             className="min-h-full"
           >
             {children}
           </motion.div>
         </AnimatePresence>
       </main>
+
+      {/* Global Spotlight Search */}
+      <CommandPalette />
     </div>
   );
 };

@@ -5,11 +5,13 @@ import {
   BarChart2, Package, AlertTriangle, Calendar, ShieldAlert,
   TrendingUp, TrendingDown, ArrowUpDown, RefreshCw,
   ChevronLeft, ChevronRight, Tag, Clock, Activity,
-  ArrowUp, ArrowDown, Database, DollarSign, Truck, FileDown, Loader2,
-  ShoppingCart, CheckCircle2
+  ArrowUp, ArrowDown, ArrowRight, Database, DollarSign, Truck, FileDown, Loader2,
+  ShoppingCart, CheckCircle2, FileSpreadsheet
 } from 'lucide-react';
 import { getAnalytics, getStockLogs, getExpiringMedicines } from '../services/api';
 import { exportReportAsPDF } from '../utils/exportPdf';
+import { exportStockLogsCSV } from '../utils/exportCsv';
+import StatDetailModal from '../components/StatDetailModal';
 
 /* ── helpers ────────────────────────────────────────────────────────────────── */
 
@@ -47,22 +49,38 @@ const STAT_PALETTE = {
   purple: { icon: 'text-purple-400',  bg: 'bg-purple-500/10 border-purple-500/20', grad: 'from-purple-500 to-indigo-400', glow: 'rgba(168,85,247,0.18)' },
 };
 
-const StatCard = ({ icon: Icon, value, label, sublabel, color = 'sky', delay = 0 }) => {
+const StatCard = ({ icon: Icon, value, label, sublabel, color = 'sky', delay = 0, onClick }) => {
   const p = STAT_PALETTE[color] || STAT_PALETTE.sky;
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      className="glass-card rounded-2xl p-5 relative overflow-hidden"
+      onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? (e) => (e.key === 'Enter' || e.key === ' ') && onClick() : undefined}
+      className={`glass-card rounded-2xl p-5 relative overflow-hidden transition-all duration-250 group ${
+        onClick ? 'cursor-pointer hover:-translate-y-1 hover:shadow-xl hover:border-sky-500/30' : ''
+      }`}
       style={{ border: '1px solid var(--border-subtle)' }}
     >
       <div
-        className="absolute inset-0 pointer-events-none"
+        className="absolute inset-0 pointer-events-none transition-opacity duration-300 opacity-60 group-hover:opacity-100"
         style={{ background: `radial-gradient(circle at top right, ${p.glow}, transparent 65%)` }}
       />
-      <div className={`w-10 h-10 rounded-xl ${p.bg} border flex items-center justify-center mb-4`}>
-        <Icon className={`w-5 h-5 ${p.icon}`} />
+      <div className="flex items-start justify-between mb-4">
+        <div className={`w-10 h-10 rounded-xl ${p.bg} border flex items-center justify-center`}>
+          <Icon className={`w-5 h-5 ${p.icon}`} />
+        </div>
+        {onClick && (
+          <span
+            className="text-[10px] font-semibold px-2 py-0.5 rounded-full border transition-all duration-200 opacity-0 group-hover:opacity-100 flex items-center gap-1"
+            style={{ background: 'var(--border-subtle)', borderColor: 'var(--border-default)', color: 'var(--text-muted)' }}
+          >
+            Details <ArrowRight className="w-2.5 h-2.5" />
+          </span>
+        )}
       </div>
       <p className="text-3xl font-extrabold tracking-tight" style={{ color: 'var(--text-primary)' }}>
         {value ?? '—'}
@@ -732,6 +750,9 @@ const Reports = () => {
   const [lastRefresh, setLastRefresh]       = useState(new Date());
   const [pdfExporting, setPdfExporting]     = useState(false);
 
+  // Detail Modal state for clicked StatCards
+  const [selectedStatModal, setSelectedStatModal] = useState(null);
+
   /* Fetch analytics */
   const loadAnalytics = useCallback(() => {
     setAnalyticsLoading(true);
@@ -796,10 +817,22 @@ const Reports = () => {
     }
   };
 
+  /* Export Stock Logs as CSV */
+  const handleExportCSV = async () => {
+    try {
+      const res = await getStockLogs(0, 1000);
+      const allLogs = res.data?.content || [];
+      exportStockLogsCSV(allLogs);
+    } catch (err) {
+      console.error('CSV export failed:', err);
+      alert('Failed to export CSV.');
+    }
+  };
+
   const statsConfig = [
     { icon: Package,       key: 'totalMedicines',     label: 'Total Medicines',  sublabel: 'Active records',       color: 'sky',     delay: 0    },
     { icon: ShieldAlert,   key: 'lowStockCount',      label: 'Low Stock',        sublabel: 'Quantity ≤ 10 units',  color: 'amber',   delay: 0.07 },
-    { icon: Clock,         key: 'expiringCount',      label: 'Expiring Soon',    sublabel: 'Within 30 days',       color: 'rose',    delay: 0.14 },
+    { icon: Clock,         key: 'expiringCount',      label: 'Expiring Soon',    sublabel: 'Within 3 months (90 days)', color: 'rose', delay: 0.14 },
     { icon: AlertTriangle, key: 'expiredCount',        label: 'Expired',          sublabel: 'Past expiry date',     color: 'red',     delay: 0.21 },
   ];
 
@@ -829,13 +862,21 @@ const Reports = () => {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2 self-start sm:self-auto">
+          <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
             <button
               onClick={handleRefresh}
-              className="btn-ghost flex items-center gap-2 text-sm py-2.5 px-4"
+              className="btn-ghost flex items-center gap-2 text-sm py-2.5 px-3.5"
             >
               <RefreshCw className="w-3.5 h-3.5" />
               Refresh
+            </button>
+            <button
+              onClick={handleExportCSV}
+              className="btn-ghost flex items-center gap-2 text-sm py-2.5 px-3.5 border border-[var(--border-default)] hover:bg-[var(--border-subtle)]"
+              title="Download Stock Movement Logs as CSV"
+            >
+              <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
+              <span>Export CSV</span>
             </button>
             <button
               id="export-pdf-btn"
@@ -867,6 +908,7 @@ const Reports = () => {
               sublabel={sublabel}
               color={color}
               delay={delay}
+              onClick={() => setSelectedStatModal({ statKey: key, statValue: analytics?.[key] ?? 0 })}
             />
           ))}
           {/* Inventory Value card */}
@@ -877,6 +919,7 @@ const Reports = () => {
             sublabel="Total stock worth"
             color="emerald"
             delay={0.28}
+            onClick={() => setSelectedStatModal({ statKey: 'inventoryValue', statValue: inventoryValue })}
           />
         </div>
 
@@ -894,10 +937,42 @@ const Reports = () => {
              </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-              <StatCard icon={ShoppingCart} value={analytics?.totalPurchaseOrders || 0} label="Total Orders" sublabel="All time" color="sky" delay={0} />
-              <StatCard icon={Clock} value={analytics?.pendingOrders || 0} label="Pending Orders" sublabel="Awaiting delivery" color="amber" delay={0.05} />
-              <StatCard icon={CheckCircle2} value={analytics?.receivedOrders || 0} label="Received Orders" sublabel="Completed" color="emerald" delay={0.1} />
-              <StatCard icon={DollarSign} value={`$${analytics?.totalPurchaseSpend?.toLocaleString() || '0'}`} label="Total Spend" sublabel="Purchase value" color="indigo" delay={0.15} />
+              <StatCard
+                icon={ShoppingCart}
+                value={analytics?.totalPurchaseOrders || 0}
+                label="Total Orders"
+                sublabel="All time"
+                color="sky"
+                delay={0}
+                onClick={() => setSelectedStatModal({ statKey: 'totalPurchaseOrders', statValue: analytics?.totalPurchaseOrders || 0 })}
+              />
+              <StatCard
+                icon={Clock}
+                value={analytics?.pendingOrders || 0}
+                label="Pending Orders"
+                sublabel="Awaiting delivery"
+                color="amber"
+                delay={0.05}
+                onClick={() => setSelectedStatModal({ statKey: 'pendingOrders', statValue: analytics?.pendingOrders || 0 })}
+              />
+              <StatCard
+                icon={CheckCircle2}
+                value={analytics?.receivedOrders || 0}
+                label="Received Orders"
+                sublabel="Completed"
+                color="emerald"
+                delay={0.1}
+                onClick={() => setSelectedStatModal({ statKey: 'receivedOrders', statValue: analytics?.receivedOrders || 0 })}
+              />
+              <StatCard
+                icon={DollarSign}
+                value={formatCurrency(analytics?.totalPurchaseSpend)}
+                label="Total Spend"
+                sublabel="Purchase value"
+                color="purple"
+                delay={0.15}
+                onClick={() => setSelectedStatModal({ statKey: 'totalPurchaseSpend', statValue: formatCurrency(analytics?.totalPurchaseSpend) })}
+              />
             </div>
           )}
         </div>
@@ -1094,6 +1169,14 @@ const Reports = () => {
             />
           </motion.div>
         </div>
+
+        {/* ── Stat Detail Modal ──────────────────────────────────────────────────── */}
+        <StatDetailModal
+          isOpen={!!selectedStatModal}
+          statKey={selectedStatModal?.statKey}
+          statValue={selectedStatModal?.statValue}
+          onClose={() => setSelectedStatModal(null)}
+        />
 
       </div>
     </Layout>

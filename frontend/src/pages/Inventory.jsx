@@ -9,16 +9,17 @@ import ConfirmDialog from '../components/ConfirmDialog';
 import {
   getMedicines, createMedicine, updateMedicine,
   deleteMedicine, adjustStock, getCategories,
-  getLowStockMedicines, getExpiringMedicines
+  getLowStockMedicines, getExpiringMedicines, getExpiredMedicines
 } from '../services/api';
 import {
   Package, Plus, Search, Filter, Edit2, Trash2,
   ArrowUpDown, RefreshCw, AlertTriangle, Calendar,
-  ChevronLeft, ChevronRight, X, LayoutList, ShieldAlert, Clock
+  ChevronLeft, ChevronRight, X, LayoutList, ShieldAlert, Clock, FileSpreadsheet, Loader2
 } from 'lucide-react';
+import { exportMedicinesCSV } from '../utils/exportCsv';
 
 const LOW_STOCK  = 10;
-const EXPIRY_DAYS = 30;
+const EXPIRY_DAYS = 90; // 3 months (90 days)
 
 const daysUntilExpiry = (dateStr) =>
   Math.ceil((new Date(dateStr) - new Date()) / 86400000);
@@ -109,7 +110,13 @@ const Inventory = () => {
       // When a special URL filter is active, call the dedicated endpoint which
       // returns ALL matching records — not just the current page.
       if (urlFilter === 'expiring') {
-        const res = await getExpiringMedicines(30);
+        const res = await getExpiringMedicines(EXPIRY_DAYS);
+        const data = res.data || [];
+        setMedicines(data);
+        setTotalPages(1);
+        setTotalElements(data.length);
+      } else if (urlFilter === 'expired') {
+        const res = await getExpiredMedicines();
         const data = res.data || [];
         setMedicines(data);
         setTotalPages(1);
@@ -225,11 +232,29 @@ const Inventory = () => {
 
   // Active filter display config
   const filterConfig = {
-    lowStock:   { label: 'Low Stock Items',          icon: ShieldAlert,    color: 'amber', borderColor: 'rgba(245,158,11,0.25)', bg: 'rgba(245,158,11,0.07)', iconColor: '#f59e0b', textColor: '#fbbf24' },
-    expiring:   { label: 'Expiring Within 30 Days',  icon: Clock,          color: 'rose',  borderColor: 'rgba(244,63,94,0.25)',  bg: 'rgba(244,63,94,0.07)',  iconColor: '#f43f5e', textColor: '#fb7185' },
+    lowStock:   { label: 'Low Stock Items',                  icon: ShieldAlert,    color: 'amber', borderColor: 'rgba(245,158,11,0.25)', bg: 'rgba(245,158,11,0.07)', iconColor: '#f59e0b', textColor: '#fbbf24' },
+    expiring:   { label: 'Expiring in Next 3 Months (90 Days)', icon: Clock,          color: 'rose',  borderColor: 'rgba(244,63,94,0.25)',  bg: 'rgba(244,63,94,0.07)',  iconColor: '#f43f5e', textColor: '#fb7185' },
+    expired:    { label: 'Expired Medicines',        icon: AlertTriangle,  color: 'red',   borderColor: 'rgba(239,68,68,0.25)',  bg: 'rgba(239,68,68,0.07)',  iconColor: '#ef4444', textColor: '#f87171' },
     outOfStock: { label: 'Out of Stock',             icon: AlertTriangle,  color: 'red',   borderColor: 'rgba(239,68,68,0.25)',  bg: 'rgba(239,68,68,0.07)',  iconColor: '#ef4444', textColor: '#f87171' },
   };
   const activeFilter = urlFilter ? filterConfig[urlFilter] : null;
+
+  const [csvExporting, setCsvExporting] = useState(false);
+
+  const handleExportCSV = async () => {
+    if (csvExporting) return;
+    setCsvExporting(true);
+    try {
+      const res = await getMedicines({ page: 0, size: 1000 });
+      const allMeds = res.data?.content || [];
+      exportMedicinesCSV(allMeds);
+    } catch (err) {
+      console.error('Failed to export medicines CSV:', err);
+      setActionError('Failed to export inventory CSV.');
+    } finally {
+      setCsvExporting(false);
+    }
+  };
 
   return (
     <Layout>
@@ -255,12 +280,28 @@ const Inventory = () => {
             </div>
           </div>
 
-          {canWrite && (
-            <button onClick={() => setAddModal(true)} className="btn-primary">
-              <Plus className="w-4 h-4" />
-              Add Medicine
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <button
+              onClick={handleExportCSV}
+              disabled={csvExporting || loading}
+              className="btn-ghost flex items-center gap-2 text-sm py-2.5 px-4 border border-[var(--border-default)] hover:bg-[var(--border-subtle)] disabled:opacity-50"
+              title="Download entire inventory spreadsheet as CSV"
+            >
+              {csvExporting ? (
+                <Loader2 className="w-4 h-4 text-emerald-400 animate-spin" />
+              ) : (
+                <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
+              )}
+              <span>{csvExporting ? 'Exporting…' : 'Export CSV'}</span>
             </button>
-          )}
+
+            {canWrite && (
+              <button onClick={() => setAddModal(true)} className="btn-primary">
+                <Plus className="w-4 h-4" />
+                Add Medicine
+              </button>
+            )}
+          </div>
         </motion.div>
 
         {/* ── Error Banner ─────────────────────────────── */}
@@ -420,8 +461,9 @@ const Inventory = () => {
             >
               <option value="">All Statuses</option>
               <option value="lowStock">⚠ Low Stock</option>
-              <option value="outOfStock">✕ Out of Stock</option>
               <option value="expiring">⏰ Expiring Soon</option>
+              <option value="expired">⛔ Expired</option>
+              <option value="outOfStock">✕ Out of Stock</option>
             </select>
           </div>
 

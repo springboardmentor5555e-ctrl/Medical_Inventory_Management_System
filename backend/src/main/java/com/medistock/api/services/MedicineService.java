@@ -147,6 +147,20 @@ public class MedicineService {
                 .collect(Collectors.toList());
     }
 
+    public List<MedicineDTO> getExpiredMedicines() {
+        return medicineRepository.findByExpiryDateBefore(LocalDate.now())
+                .stream()
+                .map(MedicineDTO::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    public List<MedicineDTO> getMedicinesBySupplier(Long supplierId) {
+        return medicineRepository.findBySupplierId(supplierId)
+                .stream()
+                .map(MedicineDTO::fromEntity)
+                .collect(Collectors.toList());
+    }
+
     public long getTotalCount() {
         return medicineRepository.count();
     }

@@ -15,16 +15,20 @@ import java.util.stream.Collectors;
 @Service
 public class NotificationService {
 
+
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
     private final MedicineRepository medicineRepository;
+    private final EmailService emailService;
 
     public NotificationService(NotificationRepository notificationRepository,
                                UserRepository userRepository,
-                               MedicineRepository medicineRepository) {
+                               MedicineRepository medicineRepository,
+                               EmailService emailService) {
         this.notificationRepository = notificationRepository;
         this.userRepository = userRepository;
         this.medicineRepository = medicineRepository;
+        this.emailService = emailService;
     }
 
     // ─── Read ────────────────────────────────────────────────────────────────────
@@ -88,13 +92,13 @@ public class NotificationService {
     public void generateExpiryAndLowStockNotifications() {
         List<User> allUsers = userRepository.findAll();
         LocalDate today = LocalDate.now();
-        LocalDate expiryWindow = today.plusDays(30);
+        LocalDate expiryWindow = today.plusDays(90);
         LocalDateTime dedupSince = LocalDateTime.now().minusHours(23);
 
         // Low-stock medicines (quantity ≤ 10)
         List<Medicine> lowStock = medicineRepository.findByQuantityLessThanEqual(10);
 
-        // Expiring within 30 days (and not yet expired)
+        // Expiring within 3 months (90 days) (and not yet expired)
         List<Medicine> expiring = medicineRepository.findExpiringBetween(today, expiryWindow);
 
         // Expired medicines
@@ -113,6 +117,12 @@ public class NotificationService {
                             medicine.getName(), medicine.getBatchNumber(), medicine.getQuantity());
                     notificationRepository.save(
                             new Notification(user, message, NotificationType.LOW_STOCK, NotificationStatus.UNREAD));
+                    // Send email alert (best-effort — failure only logged)
+                    emailService.sendLowStockAlert(
+                            user.getEmail(),
+                            medicine.getName(),
+                            medicine.getBatchNumber(),
+                            medicine.getQuantity());
                 }
             }
 
@@ -129,6 +139,13 @@ public class NotificationService {
                             daysLeft, medicine.getExpiryDate());
                     notificationRepository.save(
                             new Notification(user, message, NotificationType.EXPIRY, NotificationStatus.UNREAD));
+                    // Send email alert (best-effort)
+                    emailService.sendExpiryAlert(
+                            user.getEmail(),
+                            medicine.getName(),
+                            medicine.getBatchNumber(),
+                            medicine.getExpiryDate().toString(),
+                            daysLeft);
                 }
             }
 
@@ -143,6 +160,13 @@ public class NotificationService {
                             medicine.getName(), medicine.getBatchNumber(), medicine.getExpiryDate());
                     notificationRepository.save(
                             new Notification(user, message, NotificationType.EXPIRY, NotificationStatus.UNREAD));
+                    // Send email alert for expired medicine (negative daysLeft = already expired)
+                    emailService.sendExpiryAlert(
+                            user.getEmail(),
+                            medicine.getName(),
+                            medicine.getBatchNumber(),
+                            medicine.getExpiryDate().toString(),
+                            -1L);
                 }
             }
         }

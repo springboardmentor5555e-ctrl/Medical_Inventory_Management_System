@@ -103,15 +103,25 @@ public class MedicineController {
 
     @GetMapping("/expiring")
     public ResponseEntity<List<MedicineDTO>> getExpiringMedicines(
-            @RequestParam(defaultValue = "30") int days
+            @RequestParam(defaultValue = "90") int days
     ) {
         return ResponseEntity.ok(medicineService.getExpiringMedicines(days));
+    }
+
+    @GetMapping("/expired")
+    public ResponseEntity<List<MedicineDTO>> getExpiredMedicines() {
+        return ResponseEntity.ok(medicineService.getExpiredMedicines());
+    }
+
+    @GetMapping("/supplier/{supplierId}")
+    public ResponseEntity<List<MedicineDTO>> getMedicinesBySupplier(@PathVariable Long supplierId) {
+        return ResponseEntity.ok(medicineService.getMedicinesBySupplier(supplierId));
     }
 
     @GetMapping("/stats")
     public ResponseEntity<Map<String, Long>> getDashboardStats(
             @RequestParam(defaultValue = "10") int lowStockThreshold,
-            @RequestParam(defaultValue = "30") int expiryDays
+            @RequestParam(defaultValue = "90") int expiryDays
     ) {
         Map<String, Long> stats = new HashMap<>();
         stats.put("totalMedicines", medicineService.getTotalCount());

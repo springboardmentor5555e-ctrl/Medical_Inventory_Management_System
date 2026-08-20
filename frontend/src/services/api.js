@@ -41,9 +41,13 @@ export const deleteMedicine = (id) => api.delete(`/medicines/${id}`);
 export const adjustStock = (data) => api.post('/medicines/adjust-stock', data);
 export const getLowStockMedicines = (threshold = 10) =>
   api.get('/medicines/low-stock', { params: { threshold } });
-export const getExpiringMedicines = (days = 30) =>
+export const getExpiringMedicines = (days = 90) =>
   api.get('/medicines/expiring', { params: { days } });
-export const getDashboardStats = (lowStockThreshold = 10, expiryDays = 30) =>
+export const getExpiredMedicines = () =>
+  api.get('/medicines/expired');
+export const getMedicinesBySupplier = (supplierId) =>
+  api.get(`/medicines/supplier/${supplierId}`);
+export const getDashboardStats = (lowStockThreshold = 10, expiryDays = 90) =>
   api.get('/medicines/stats', { params: { lowStockThreshold, expiryDays } });
 
 // ─── Categories ───────────────────────────────────────────────────────────────
@@ -83,5 +87,28 @@ export const createPurchaseOrder = (data) => api.post('/purchase-orders', data);
 export const updatePurchaseOrderStatus = (id, status) =>
   api.put(`/purchase-orders/${id}/status`, null, { params: { status } });
 export const deletePurchaseOrder = (id) => api.delete(`/purchase-orders/${id}`);
+
+// ─── Users ────────────────────────────────────────────────────────────────────
+export const getUsers = () => api.get('/users');
+export const getUserById = (id) => api.get(`/users/${id}`);
+export const updateUser = (id, data) => api.put(`/users/${id}`, data);
+export const deleteUser = (id) => api.delete(`/users/${id}`);
+export const getMe = () => api.get('/users/me');
+export const changePassword = (data) => api.put('/users/me/change-password', data);
+
+// ─── Activity Logs (Admin) ────────────────────────────────────────────────────
+export const getActivityLogs = (page = 0, size = 20) =>
+  api.get('/activity-logs', { params: { page, size } });
+export const getRecentActivityLogs = () => api.get('/activity-logs/recent');
+export const getActivityLogsByUser = (username, page = 0, size = 20) =>
+  api.get(`/activity-logs/user/${username}`, { params: { page, size } });
+export const getActivityLogsByEntity = (entityType, page = 0, size = 20) =>
+  api.get(`/activity-logs/entity/${entityType}`, { params: { page, size } });
+export const getUserActivitySummary = (days = 7) =>
+  api.get('/activity-logs/summary', { params: { days } });
+
+// ─── Supplier Analytics ───────────────────────────────────────────────────────
+export const getAllSupplierPerformance = () => api.get('/supplier-analytics');
+export const getSupplierPerformance = (id) => api.get(`/supplier-analytics/${id}`);
 
 export default api;
