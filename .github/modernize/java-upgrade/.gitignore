@@ -1,0 +1,8 @@
+# Spring Boot build files
+target/
+backend/target/
+
+# Environment variables
+.env
+
+# Local Spring configuration containing environment-specific settings

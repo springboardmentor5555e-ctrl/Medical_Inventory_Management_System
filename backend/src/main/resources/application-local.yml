@@ -1,0 +1,64 @@
+# ===================================================================
+# MEDISTOCK - LOCAL DEVELOPMENT PROFILE
+# Run with: java -jar app.jar --spring.profiles.active=local
+# Or set env variable: SPRING_PROFILES_ACTIVE=local
+# ===================================================================
+
+spring:
+  # LOCAL POSTGRESQL - point to your local database
+  datasource:
+    url: jdbc:postgresql://localhost:5432/medistock_local
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 1
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update   # Auto creates/updates tables locally - safe for dev
+    show-sql: true
+
+  # DISABLE MAIL in local dev (no Gmail credentials needed)
+  mail:
+    host: localhost
+    port: 1025
+    username: local@medistock.com
+    password: nopassword
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+    test-connection: false
+
+  # DISABLE OAUTH2 in local dev (no Google credentials needed)
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: local-disabled
+            client-secret: local-disabled
+
+# LOCAL DEV APP SETTINGS
+medistock:
+  frontend-url: http://localhost:3000
+  mail:
+    enabled: false       # Set to false: emails are logged to console only
+    admin-email: local-admin@medistock.com
+
+server:
+  port: 8080
+
+jwt:
+  secret: local_dev_secret_key_minimum_32_chars_for_safety
+  expiration: 86400000
+
+logging:
+  level:
+    com.medistock: DEBUG
+    org.hibernate.SQL: DEBUG
