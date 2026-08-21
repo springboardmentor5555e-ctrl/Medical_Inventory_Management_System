@@ -183,6 +183,7 @@ Medicine Workflow
        ┌────┴────┐
        ▼         ▼
      Update    Delete
+
 🔎 3. Medicine Search & Filtering
 
 The Medicines page supports multiple filtering options.
@@ -205,6 +206,7 @@ Stock Status
           │            │            │
           ▼            ▼            ▼
       In Stock     Low Stock    Out of Stock
+
 🏢 4. Supplier Management
 
 The Supplier module maintains supplier information.
@@ -216,6 +218,7 @@ Update supplier
 Delete supplier
 Maintain supplier information
 Connect suppliers with medicines
+
 📦 5. Inventory Management
 
 The Inventory module is used to monitor medicine stock.
@@ -242,6 +245,7 @@ Normal Stock     Low Stock
                    │
                    ▼
                  Alert
+
 ⚠️ 6. Low Stock Monitoring
 
 MediStock identifies medicines whose available quantity reaches the low-stock threshold.
@@ -260,6 +264,7 @@ MediStock identifies medicines whose available quantity reaches the low-stock th
                       Alert User
 
 This helps users identify medicines that require restocking.
+
 ⏳ 7. Expiry Tracking
 
 The system monitors medicine expiry dates.
@@ -283,6 +288,7 @@ Near-expiry identification
 Expired medicine identification
 Expiry alerts
 Expiry information in dashboard
+
 📊 8. Dashboard
 
 The MediStock dashboard provides a centralized overview of the system.
@@ -310,6 +316,7 @@ Dashboard Sections
                      │
                      ▼
                Quick Modules
+
 🔔 9. Notifications
 
 The notification section displays important inventory-related alerts.
@@ -321,6 +328,7 @@ Inventory-related notifications
 System updates
 
 Users can view recent notifications directly from the dashboard and navigate to the Notifications page for more details.
+
 📈 10. Analytics
 
 The analytics functionality provides an overview of inventory information.
@@ -343,6 +351,7 @@ Near Expiry         → 1
 Expired             → 1
 
 The dashboard also provides a visual inventory overview using charts.
+
 📄 11. Reports
 
 The Reports module provides summarized inventory information.
