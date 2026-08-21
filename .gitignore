@@ -1,0 +1,26 @@
+# Node
+node_modules/
+dist/
+.vite/
+
+# Java / Spring Boot
+target/
+*.class
+
+# Environment / Secrets
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
