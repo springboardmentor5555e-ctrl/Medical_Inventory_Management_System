@@ -469,6 +469,7 @@ Monitoring APIs
 /medicines/expired
 /medicines/nearexpiry
 /medicines/lowstock
+
 🚀 Running the Project
 Prerequisites
 
@@ -574,6 +575,7 @@ Role-based access
 Sensitive configuration values such as database credentials and secret keys should not be committed to GitHub.
 
 📅 Project Development Milestones
+
 Milestone 1 – Requirements, Database & Backend Setup
 Project requirements
 Database design
@@ -581,6 +583,7 @@ Spring Boot setup
 PostgreSQL configuration
 Authentication
 React project setup
+
 Milestone 2 – Inventory & Supplier Management
 Medicine management
 Supplier management
@@ -588,12 +591,14 @@ Inventory management
 Search and filtering
 Stock monitoring
 Dashboard development
+
 Milestone 3 – Expiry Tracking & Notifications
 Expiry tracking
 Low-stock alerts
 Notifications
 Analytics
 Reports
+
 Milestone 4 – Testing & Final Integration
 Dashboard improvements
 Testing
@@ -619,7 +624,9 @@ Implemented Modules
 ✅ Inventory Analytics
 ✅ Notifications
 ✅ Reports
+
 Project Structure
+
 Frontend
    │
    ├── Dashboard
@@ -643,6 +650,7 @@ Backend
 Database
    │
    └── PostgreSQL
+
 🔮 Future Enhancements
 
 Potential future improvements include:
