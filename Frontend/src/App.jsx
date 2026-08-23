@@ -1,65 +1,101 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import PharmacistAddMedicine from "./pages/PharmacistAddMedicine";
-import Login from "./pages/Login";
-import AdminDashboard from "./pages/AdminDashboard";
-import PharmacistDashboard from "./pages/PharmacistDashboard";
-import AddMedicine from "./pages/AddMedicine";
-import Medicines from "./pages/Medicines";
-import AddSupplier from "./pages/AddSupplier";
-import Suppliers from "./pages/Suppliers";
-import EditSupplier from "./pages/EditSupplier";
-import AddUser from "./pages/AddUser";
-import Users from "./pages/Users";
-import Reports from "./pages/Reports";
-import StockReport from "./pages/StockReport";
-import ExpiryReport from "./pages/ExpiryReport";
-import SupplierReport from "./pages/SupplierReport";
-import Notifications from "./pages/Notifications";
-import StaffDashboard from "./pages/StaffDashboard";
+import React from 'react'
+import { Routes, Route } from 'react-router-dom'
 
-function App() {
+import Login from './pages/Login'
+import Register from './pages/Register'
+import Dashboard from './pages/Dashboard'
+import Medicines from './pages/Medicines'
+import Suppliers from './pages/Suppliers'
+import ExpiryTracking from './pages/ExpiryTracking'
+import Reports from './pages/Reports'
+
+import Navbar from './components/Navbar'
+import ProtectedRoute from './components/ProtectedRoute'
+
+function Layout({ children }) {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/add-supplier" element={<AddSupplier />} />
-<Route path="/suppliers" element={<Suppliers />} />
-        <Route path="/" element={<Login />} />
-        <Route path="/admin-dashboard" element={<AdminDashboard />} />
-        <Route path="/pharmacist-dashboard" element={<PharmacistDashboard />} />
-        <Route path="/add-medicine" element={<AddMedicine />} />
-        <Route path="/medicines" element={<Medicines />} />
-        <Route path="/add-supplier" element={<AddSupplier />} />
-        <Route path="/suppliers" element={<Suppliers />} />
-        <Route path="/stock-report" element={<StockReport />} />
-        <Route
-    path="/pharmacist-add-medicine"
-    element={<PharmacistAddMedicine />}
-/>
-        <Route 
-path="/edit-supplier/:id" 
-element={<EditSupplier />} 
-/>
-<Route path="/reports" element={<Reports />} />
-<Route
-    path="/users"
-    element={<Users />}
-/>
-<Route 
-path="/staff-dashboard" 
-element={<StaffDashboard />} 
-/>
-<Route
-    path="/add-user"
-    element={<AddUser />}
-/>
-<Route
-    path="/notifications"
-    element={<Notifications />}
-/>
-<Route path="/expiry-report" element={<ExpiryReport />} />
-      </Routes>
-    </BrowserRouter>
-  );
+    <div className="min-h-screen bg-slate-50">
+      <Navbar />
+      {children}
+    </div>
+  )
 }
 
-export default App;
+export default function App() {
+  return (
+    <Routes>
+
+      {/* Authentication */}
+      <Route
+        path="/login"
+        element={<Login />}
+      />
+
+      <Route
+        path="/register"
+        element={<Register />}
+      />
+
+      {/* Dashboard */}
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Dashboard />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Medicines */}
+      <Route
+        path="/medicines"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Medicines />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Suppliers */}
+      <Route
+        path="/suppliers"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Suppliers />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Expiry Tracking */}
+      <Route
+        path="/expiry-tracking"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <ExpiryTracking />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Reports */}
+      <Route
+        path="/reports"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Reports />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+    </Routes>
+  )
+}
