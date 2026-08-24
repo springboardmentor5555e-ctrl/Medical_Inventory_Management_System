@@ -156,13 +156,11 @@ public class Medicine {
     // ===============================
 
 
-    @Column(
-            nullable = false
-    )
-    private int minStockLevel = 10;
-
-
-
+   @Column(
+        name = "minimum_stock",
+        nullable = false
+)
+private int minStockLevel = 10;
 
 
 

@@ -1,0 +1,507 @@
+/* =====================================================
+   REGISTER PAGE
+===================================================== */
+
+* {
+    box-sizing: border-box;
+}
+
+.auth-container {
+    min-height: 100vh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 70px;
+    padding: 40px 60px;
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    position: relative;
+    overflow-y: auto;
+}
+
+/* Dark overlay */
+.auth-container::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        135deg,
+        rgba(4, 35, 85, 0.82),
+        rgba(0, 145, 190, 0.60)
+    );
+
+    z-index: 0;
+}
+
+
+/* =====================================================
+   LEFT SECTION
+===================================================== */
+
+.auth-left {
+    width: 430px;
+    color: white;
+    position: relative;
+    z-index: 1;
+}
+
+.brand {
+    margin-bottom: 35px;
+}
+
+.brand h1 {
+    font-size: 48px;
+    margin: 0 0 10px;
+    font-weight: 800;
+    letter-spacing: -1px;
+}
+
+.brand p {
+    font-size: 20px;
+    margin: 0;
+    opacity: 0.95;
+}
+
+.feature-list {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin-top: 35px;
+}
+
+.feature-list div {
+    font-size: 19px;
+    padding: 14px 18px;
+
+    background: rgba(255, 255, 255, 0.13);
+    border: 1px solid rgba(255, 255, 255, 0.20);
+
+    border-radius: 12px;
+
+    backdrop-filter: blur(8px);
+
+    transition: 0.3s ease;
+}
+
+.feature-list div:hover {
+    transform: translateX(8px);
+    background: rgba(255, 255, 255, 0.20);
+}
+
+
+/* =====================================================
+   REGISTER CARD
+===================================================== */
+
+.auth-card {
+    width: 500px;
+    max-width: 100%;
+
+    background: rgba(255, 255, 255, 0.97);
+
+    border-radius: 25px;
+
+    padding: 38px 42px;
+
+    position: relative;
+    z-index: 1;
+
+    box-shadow:
+        0 25px 60px rgba(0, 0, 0, 0.25);
+
+    animation: cardAppear 0.6s ease;
+}
+
+@keyframes cardAppear {
+
+    from {
+        opacity: 0;
+        transform: translateY(25px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* =====================================================
+   ICON
+===================================================== */
+
+.medical-icon {
+    width: 70px;
+    height: 70px;
+
+    margin: 0 auto 15px;
+
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 36px;
+
+    background: linear-gradient(
+        135deg,
+        #e8f1ff,
+        #d8f5ff
+    );
+
+    box-shadow: 0 8px 20px rgba(0, 80, 160, 0.12);
+}
+
+
+/* =====================================================
+   TITLE
+===================================================== */
+
+.title {
+    text-align: center;
+
+    font-size: 32px;
+
+    color: #123f91;
+
+    margin: 0 0 28px;
+
+    font-weight: 800;
+}
+
+
+/* =====================================================
+   FORM
+===================================================== */
+
+.auth-card form {
+    width: 100%;
+}
+
+.input-group {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+
+    background: #f2f5fa;
+
+    border: 1px solid #e1e7f0;
+
+    border-radius: 12px;
+
+    margin-bottom: 15px;
+
+    padding: 0 15px;
+
+    transition: 0.25s ease;
+}
+
+.input-group svg {
+    color: #1753a5;
+    font-size: 17px;
+    flex-shrink: 0;
+}
+
+.input-group:focus-within {
+    border-color: #1761c5;
+
+    background: white;
+
+    box-shadow:
+        0 0 0 4px rgba(23, 97, 197, 0.10);
+}
+
+.input-group input {
+    width: 100%;
+
+    border: none;
+    outline: none;
+
+    background: transparent;
+
+    padding: 14px 12px;
+
+    font-size: 16px;
+
+    color: #222;
+}
+
+.input-group input::placeholder {
+    color: #8994a5;
+}
+
+
+/* =====================================================
+   PASSWORD
+===================================================== */
+
+.password-wrapper {
+    position: relative;
+}
+
+.password-wrapper input {
+    padding-right: 45px;
+}
+
+.eye-btn {
+    position: absolute;
+
+    right: 10px;
+
+    width: 35px;
+    height: 35px;
+
+    border: none;
+
+    background: transparent;
+
+    cursor: pointer;
+
+    color: #1753a5;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 17px;
+}
+
+.eye-btn:hover {
+    color: #0a3470;
+}
+
+
+/* =====================================================
+   ROLE TITLE
+===================================================== */
+
+.role-title {
+    text-align: center;
+
+    margin: 22px 0 12px;
+
+    font-size: 18px;
+
+    color: #26364d;
+}
+
+
+/* =====================================================
+   ROLE BOX
+===================================================== */
+
+.role-box {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 10px;
+
+    margin-bottom: 22px;
+}
+
+.role {
+    border: 1px solid #d8e0ec;
+
+    background: #f7f9fc;
+
+    border-radius: 12px;
+
+    padding: 13px 8px;
+
+    cursor: pointer;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 7px;
+
+    font-size: 14px;
+
+    color: #374151;
+
+    transition: 0.25s ease;
+}
+
+.role svg {
+    font-size: 22px;
+    color: #1753a5;
+}
+
+.role:hover {
+    transform: translateY(-3px);
+
+    border-color: #1753a5;
+
+    background: #edf4ff;
+}
+
+.role.active {
+    background: linear-gradient(
+        135deg,
+        #164b9b,
+        #1476c8
+    );
+
+    border-color: #164b9b;
+
+    color: white;
+
+    box-shadow:
+        0 7px 18px rgba(20, 85, 160, 0.25);
+}
+
+.role.active svg {
+    color: white;
+}
+
+
+/* =====================================================
+   CREATE ACCOUNT BUTTON
+===================================================== */
+
+.primary-btn {
+    width: 100%;
+
+    border: none;
+
+    border-radius: 12px;
+
+    padding: 15px;
+
+    background: linear-gradient(
+        135deg,
+        #164b9b,
+        #176bc2
+    );
+
+    color: white;
+
+    font-size: 17px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: 0.25s ease;
+
+    box-shadow:
+        0 8px 18px rgba(20, 76, 155, 0.25);
+}
+
+.primary-btn:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 12px 25px rgba(20, 76, 155, 0.32);
+}
+
+.primary-btn:active {
+    transform: translateY(0);
+}
+
+
+/* =====================================================
+   LOGIN LINK
+===================================================== */
+
+.link {
+    text-align: center;
+
+    margin-top: 20px;
+}
+
+.link a {
+    color: #1758aa;
+
+    text-decoration: none;
+
+    font-size: 15px;
+
+    font-weight: 600;
+}
+
+.link a:hover {
+    text-decoration: underline;
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 950px) {
+
+    .auth-container {
+        flex-direction: column;
+
+        gap: 30px;
+
+        padding: 35px 20px;
+    }
+
+    .auth-left {
+        width: 100%;
+        max-width: 500px;
+
+        text-align: center;
+    }
+
+    .brand h1 {
+        font-size: 38px;
+    }
+
+    .brand p {
+        font-size: 17px;
+    }
+
+    .feature-list {
+        display: none;
+    }
+
+    .auth-card {
+        width: 100%;
+        max-width: 500px;
+
+        padding: 32px 25px;
+    }
+}
+
+
+@media (max-width: 500px) {
+
+    .auth-container {
+        padding: 25px 12px;
+    }
+
+    .auth-card {
+        border-radius: 18px;
+
+        padding: 28px 20px;
+    }
+
+    .title {
+        font-size: 27px;
+    }
+
+    .role-box {
+        gap: 7px;
+    }
+
+    .role {
+        padding: 11px 5px;
+        font-size: 12px;
+    }
+}

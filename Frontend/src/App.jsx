@@ -17,6 +17,9 @@ import ExpiryReport from "./pages/ExpiryReport";
 import SupplierReport from "./pages/SupplierReport";
 import Notifications from "./pages/Notifications";
 import StaffDashboard from "./pages/StaffDashboard";
+import Analytics from "./pages/Analytics";
+import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
 
 function App() {
   return (
@@ -26,6 +29,11 @@ function App() {
         {/* Login */}
         <Route path="/" element={<Login />} />
 
+<Route path="/register" element={<Register />} />
+<Route
+    path="/forgot-password"
+    element={<ForgotPassword />}
+/>
         {/* Admin */}
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/add-medicine" element={<AddMedicine />} />
@@ -50,6 +58,10 @@ function App() {
 
         {/* Notifications */}
         <Route path="/notifications" element={<Notifications />} />
+        <Route
+    path="/analytics"
+    element={<Analytics />}
+/>
 
         {/* Pharmacist */}
         <Route

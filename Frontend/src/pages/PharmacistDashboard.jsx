@@ -122,19 +122,22 @@ setExpiredList(expiryResponse.data);
           <div className="sidebar">
 
     {/* Pharmacist Profile */}
+<div className="admin-profile">
 
-    <div className="admin-profile">
+    <div className="profile">
 
-       <div className="profile">
-    <img
-        src={pharmacistImg}
-        alt="Pharmacist"
-        className="profile-image"
-    />
-    <h3>Pharmacist</h3>
-</div>
+        <div className="profile-icon">
+            <div className="profile-head"></div>
+            <div className="profile-body"></div>
+        </div>
+
+        <h3>PATLOLLA ASHRITHA</h3>
+
+        <p>Pharmacist</p>
 
     </div>
+
+</div>
 
     {/* Logo */}
 

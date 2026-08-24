@@ -1,600 +1,320 @@
 package com.medistock.demo.controller;
 
-
-import com.medistock.demo.dto.*;
-import com.medistock.demo.entity.Role;
 import com.medistock.demo.entity.User;
-import com.medistock.demo.repository.RoleRepository;
 import com.medistock.demo.repository.UserRepository;
-import com.medistock.demo.service.JwtService;
 
-
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-
 import java.util.List;
-import java.util.Locale;
-
-
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins="http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:5173")
 public class UserController {
 
-
-
     private final UserRepository userRepository;
-
-    private final RoleRepository roleRepository;
-
     private final PasswordEncoder passwordEncoder;
 
-    private final JwtService jwtService;
-
-
-
     public UserController(
-
             UserRepository userRepository,
-
-            RoleRepository roleRepository,
-
-            PasswordEncoder passwordEncoder,
-
-            JwtService jwtService
-
-    ){
-
-        this.userRepository=userRepository;
-
-        this.roleRepository=roleRepository;
-
-        this.passwordEncoder=passwordEncoder;
-
-        this.jwtService=jwtService;
-
+            PasswordEncoder passwordEncoder
+    ) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
-
-
-
-
-
-// =================================================
-// GET ALL USERS
-// =================================================
-
-
-@GetMapping
-public ResponseEntity<List<User>> getAllUsers(){
-
-
-    List<User> users=userRepository.findAll();
-
-
-    users.forEach(
-            user -> user.setPassword(null)
-    );
-
-
-    return ResponseEntity.ok(users);
-
-}
-
-
-
-
-
-
-
-
-// =================================================
-// ADD USER
-// =================================================
-
-
-@PostMapping
-public ResponseEntity<?> addUser(
-        @RequestBody CreateUserRequest request
-){
-
-
-    try{
-
-
-        if(userRepository.findByUsername(
-                request.getUsername()
-        ).isPresent()){
-
-            return ResponseEntity
-                    .badRequest()
-                    .body("Username already exists");
-
-        }
-
-
-
-
-        if(userRepository.findByEmail(
-                request.getEmail()
-        ).isPresent()){
-
-            return ResponseEntity
-                    .badRequest()
-                    .body("Email already exists");
-
-        }
-
-
-
-
-        Role role =
-                roleRepository.findByRoleName(
-                        request.getRole()
-                                .toUpperCase(Locale.ROOT)
-                )
-                .orElseThrow(
-                        ()->new RuntimeException(
-                                "Role not found"
-                        )
-                );
-
-
-
-        User user=new User();
-
-
-        user.setFullName(
-                request.getFullName()
-        );
-
-
-        user.setUsername(
-                request.getUsername()
-        );
-
-
-        user.setEmail(
-                request.getEmail()
-        );
-
-
-        user.setPhone(
-                request.getPhone()
-        );
-
-
-        user.setPassword(
-                passwordEncoder.encode(
-                        request.getPassword()
-                )
-        );
-
-
-        user.setRole(role);
-
-
-
-        User saved=userRepository.save(user);
-
-
-        saved.setPassword(null);
-
-
-        return ResponseEntity.ok(saved);
-
-
-    }
-    catch(Exception e){
-
-        return ResponseEntity
-                .badRequest()
-                .body(e.getMessage());
-
-    }
-
-}
-
-
-
-
-
-
-
-
-
-// =================================================
-// PROFILE
-// =================================================
-
-
-@GetMapping("/profile")
-public ResponseEntity<User> profile(
-
-        @RequestHeader("Authorization")
-        String header
-
-){
-
-
-    User user=getUserFromToken(header);
-
-
-    user.setPassword(null);
-
-
-    return ResponseEntity.ok(user);
-
-}
-
-
-
-
-
-
-
-
-
-// =================================================
-// UPDATE OWN PROFILE
-// =================================================
-
-
-@PutMapping("/update-profile")
-public ResponseEntity<?> updateProfile(
-
-        @RequestHeader("Authorization")
-        String header,
-
-        @RequestBody UpdateProfileRequest request
-
-){
-
-
-    try{
-
-
-        User user=getUserFromToken(header);
-
-
-
-        user.setFullName(
-                request.getFullName()
-        );
-
-
-        user.setPhone(
-                request.getPhone()
-        );
-
-
-
-        User saved=userRepository.save(user);
-
-
-        saved.setPassword(null);
-
-
-
-        return ResponseEntity.ok(saved);
-
-
-
-    }
-    catch(Exception e){
-
-        return ResponseEntity
-                .badRequest()
-                .body(e.getMessage());
-
-    }
-
-
-}
-
-
-
-
-
-
-
-
-
-// =================================================
-// CHANGE PASSWORD
-// =================================================
-
-
-@PutMapping("/change-password")
-public ResponseEntity<?> changePassword(
-
-        @RequestHeader("Authorization")
-        String header,
-
-        @RequestBody ChangePasswordRequest request
-
-){
-
-
-    try{
-
-
-        User user=getUserFromToken(header);
-
-
-
-        if(!passwordEncoder.matches(
-
-                request.getOldPassword(),
-
-                user.getPassword()
-
-        )){
-
-
-            return ResponseEntity
-                    .badRequest()
-                    .body(
-                            "Old password incorrect"
-                    );
-
-        }
-
-
-
-
-        user.setPassword(
-
-                passwordEncoder.encode(
-                        request.getNewPassword()
-                )
-
-        );
-
-
-
-        userRepository.save(user);
-
-
-
-        return ResponseEntity.ok(
-                "Password changed successfully"
-        );
-
-
-
-    }
-    catch(Exception e){
-
-
-        return ResponseEntity
-                .badRequest()
-                .body(e.getMessage());
-
-    }
-
-
-}
-
-
-
-
-
-
-
-
-
-// =================================================
-// UPDATE USER BY ADMIN
-// =================================================
-
-
-@PutMapping("/{id}")
-public ResponseEntity<?> updateUser(
-
-        @PathVariable Long id,
-
-        @RequestBody UpdateUserRequest request
-
-){
-
-
-    try{
-
-
-        User user=userRepository.findById(id)
-
-                .orElseThrow(
-                        ()->new RuntimeException(
-                                "User not found"
-                        )
-                );
-
-
-
-        user.setFullName(
-                request.getFullName()
-        );
-
-
-        user.setUsername(
-                request.getUsername()
-        );
-
-
-        user.setEmail(
-                request.getEmail()
-        );
-
-
-        user.setPhone(
-                request.getPhone()
-        );
-
-
-
-
-        if(request.getPassword()!=null &&
-                !request.getPassword().isBlank()){
-
-
-            user.setPassword(
-
-                    passwordEncoder.encode(
-                            request.getPassword()
-                    )
-
-            );
-
-        }
-
-
-
-
-        if(request.getRole()!=null){
-
-
-            Role role=
-                    roleRepository.findByRoleName(
-
-                            request.getRole()
-                                    .toUpperCase(Locale.ROOT)
-
-                    )
-                    .orElseThrow(
-                            ()->new RuntimeException(
-                                    "Role not found"
-                            )
-                    );
-
-
-            user.setRole(role);
-
-
-        }
-
-
-
-
-        User saved=userRepository.save(user);
-
-
-        saved.setPassword(null);
-
-
-        return ResponseEntity.ok(saved);
-
-
-
-    }
-    catch(Exception e){
-
-
-        return ResponseEntity
-                .badRequest()
-                .body(e.getMessage());
-
-    }
-
-
-}
-
-
-
-
-
-
-
-
-
-// =================================================
-// DELETE USER
-// =================================================
-
-
-@DeleteMapping("/{id}")
-public ResponseEntity<?> deleteUser(
-
-        @PathVariable Long id
-
-){
-
-
-    if(!userRepository.existsById(id)){
-
-
-        return ResponseEntity
-                .badRequest()
-                .body(
-                        "User not found"
-                );
-
-    }
-
-
-
-    userRepository.deleteById(id);
-
-
+    // =====================================================
+    // GET ALL USERS
+    // =====================================================
+
+  @GetMapping
+public ResponseEntity<List<User>> getAllUsers() {
 
     return ResponseEntity.ok(
-            "User deleted successfully"
+            userRepository.findAll()
     );
-
-
 }
+    // =====================================================
+    // GET USER BY ID
+    // =====================================================
+@GetMapping("/{id}")
+public ResponseEntity<?> getUserById(
+        @PathVariable Long id
+) {
 
+    User user = userRepository.findById(id).orElse(null);
 
-
-
-
-
-
-
-
-
-// =================================================
-// GET USER FROM JWT
-// =================================================
-
-
-private User getUserFromToken(String header){
-
-
-    if(header==null ||
-            !header.startsWith("Bearer ")){
-
-        throw new RuntimeException(
-                "Invalid token"
-        );
-
+    if (user == null) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body("User not found");
     }
 
+    return ResponseEntity.ok(user);
+}
 
+    // =====================================================
+    // ADD USER
+    // =====================================================
 
-    String token=header.substring(7);
+    @PostMapping
+    public ResponseEntity<?> createUser(
+            @RequestBody User user
+    ) {
 
+        try {
 
+            // -------------------------------
+            // Validate email
+            // -------------------------------
 
-    String email=
-            jwtService.extractEmail(token);
+            if (user.getEmail() == null ||
+                    user.getEmail().isBlank()) {
 
+                return ResponseEntity
+                        .badRequest()
+                        .body("Email is required");
+            }
 
+            // -------------------------------
+            // Validate password
+            // -------------------------------
 
-    return userRepository.findByEmail(email)
+            if (user.getPassword() == null ||
+                    user.getPassword().isBlank()) {
 
-            .orElseThrow(
-                    ()->new RuntimeException(
-                            "User not found"
+                return ResponseEntity
+                        .badRequest()
+                        .body("Password is required");
+            }
+
+            // -------------------------------
+            // Validate phone
+            // -------------------------------
+
+            if (user.getPhone() == null ||
+                    user.getPhone().isBlank()) {
+
+                return ResponseEntity
+                        .badRequest()
+                        .body("Phone is required");
+            }
+
+            // -------------------------------
+            // Validate role
+            // -------------------------------
+
+            if (user.getRole() == null ||
+                    user.getRole().isBlank()) {
+
+                return ResponseEntity
+                        .badRequest()
+                        .body("Role is required");
+            }
+
+            // -------------------------------
+            // Check duplicate email
+            // -------------------------------
+
+            if (userRepository.existsByEmail(
+                    user.getEmail().trim()
+            )) {
+
+                return ResponseEntity
+                        .status(HttpStatus.CONFLICT)
+                        .body("Email already exists");
+            }
+
+            // -------------------------------
+            // Check duplicate phone
+            // -------------------------------
+if (userRepository.findByPhone(
+        user.getPhone().trim()
+).isPresent()) {
+
+    return ResponseEntity
+            .status(HttpStatus.CONFLICT)
+            .body("Phone number already exists");
+}
+            // -------------------------------
+            // Normalize values
+            // -------------------------------
+
+            user.setEmail(
+                    user.getEmail().trim()
+            );
+
+            user.setPhone(
+                    user.getPhone().trim()
+            );
+
+            user.setRole(
+                    user.getRole()
+                            .trim()
+                            .toUpperCase()
+            );
+
+            // -------------------------------
+            // Encrypt password
+            // -------------------------------
+
+            user.setPassword(
+                    passwordEncoder.encode(
+                            user.getPassword()
                     )
             );
 
+            // -------------------------------
+            // Save
+            // -------------------------------
 
-}
+            User savedUser =
+                    userRepository.save(user);
 
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(savedUser);
 
+        } catch (Exception e) {
 
+            e.printStackTrace();
+
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(
+                            "Failed to save user: "
+                                    + e.getMessage()
+                    );
+        }
+    }
+
+    // =====================================================
+    // UPDATE USER
+    // =====================================================
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateUser(
+            @PathVariable Long id,
+            @RequestBody User updatedUser
+    ) {
+
+        try {
+
+            User existingUser =
+                    userRepository.findById(id)
+                            .orElse(null);
+
+            if (existingUser == null) {
+
+                return ResponseEntity
+                        .status(HttpStatus.NOT_FOUND)
+                        .body("User not found");
+            }
+
+            // -------------------------------
+            // Update basic information
+            // -------------------------------
+
+            if (updatedUser.getFullName() != null) {
+
+                existingUser.setFullName(
+                        updatedUser.getFullName()
+                );
+            }
+
+            if (updatedUser.getEmail() != null) {
+
+                existingUser.setEmail(
+                        updatedUser.getEmail().trim()
+                );
+            }
+
+            if (updatedUser.getPhone() != null) {
+
+                existingUser.setPhone(
+                        updatedUser.getPhone().trim()
+                );
+            }
+
+            if (updatedUser.getRole() != null &&
+                    !updatedUser.getRole().isBlank()) {
+
+                existingUser.setRole(
+                        updatedUser.getRole()
+                                .trim()
+                                .toUpperCase()
+                );
+            }
+
+            // -------------------------------
+            // Update password only if supplied
+            // -------------------------------
+
+            if (updatedUser.getPassword() != null &&
+                    !updatedUser.getPassword().isBlank()) {
+
+                existingUser.setPassword(
+                        passwordEncoder.encode(
+                                updatedUser.getPassword()
+                        )
+                );
+            }
+
+            User savedUser =
+                    userRepository.save(existingUser);
+
+            return ResponseEntity.ok(savedUser);
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(
+                            "Failed to update user: "
+                                    + e.getMessage()
+                    );
+        }
+    }
+
+    // =====================================================
+    // DELETE USER
+    // =====================================================
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteUser(
+            @PathVariable Long id
+    ) {
+
+        try {
+
+            if (!userRepository.existsById(id)) {
+
+                return ResponseEntity
+                        .status(HttpStatus.NOT_FOUND)
+                        .body("User not found");
+            }
+
+            userRepository.deleteById(id);
+
+            return ResponseEntity.ok(
+                    "User deleted successfully"
+            );
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(
+                            "Failed to delete user: "
+                                    + e.getMessage()
+                    );
+        }
+    }
 }

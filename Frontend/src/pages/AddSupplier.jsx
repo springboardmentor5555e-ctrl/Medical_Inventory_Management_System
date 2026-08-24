@@ -34,28 +34,50 @@ function AddSupplier() {
     };
 
 
+const addSupplier = async (e) => {
 
-    const addSupplier = async (e) => {
+    e.preventDefault();
 
-        e.preventDefault();
+    try {
 
+        const response = await api.post("/suppliers", {
+    name: supplier.supplierName,
+    contact: supplier.phone,
+    email: supplier.email,
+    address: supplier.address
+});
 
-        try {
+        console.log("Supplier saved:", response.data);
 
-            await api.post("/suppliers", supplier);
+        alert("Supplier added successfully! ✅");
 
-            alert("Supplier added successfully");
+        navigate("/suppliers");
 
-            navigate("/suppliers");
+    } catch (error) {
 
+        console.error(
+            "Error adding supplier:",
+            error
+        );
 
-        } catch(error) {
+        if (error.response) {
 
-            console.log(error);
+            alert(
+                "Failed to add supplier: " +
+                (error.response.data?.message ||
+                 "Server error")
+            );
+
+        } else {
+
+            alert(
+                "Failed to add supplier. Please check the backend."
+            );
 
         }
 
-    };
+    }
+};
     return (
 
     <div className="add-supplier-container">

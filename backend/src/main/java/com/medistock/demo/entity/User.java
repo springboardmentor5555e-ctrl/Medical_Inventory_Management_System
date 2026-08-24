@@ -1,17 +1,12 @@
 package com.medistock.demo.entity;
 
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import jakarta.persistence.*;
-
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-
-
 
 @Entity
 @Table(name = "users")
@@ -20,153 +15,46 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class User {
 
-
-
-    // ==============================
-    // PRIMARY KEY
-    // ==============================
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
+private boolean approved = false;
 
-
-
-
-    // ==============================
-    // USERNAME
-    // ==============================
-
-    @Column(
-            nullable = false,
-            unique = true
-    )
-    private String username;
-
-
-
-
-
-    // ==============================
-    // EMAIL
-    // ==============================
-
-    @Column(
-            unique = true
-    )
+    @Column(name = "email", unique = true)
     private String email;
 
-
-
-
-
-    // ==============================
-    // PHONE
-    // ==============================
-
-    @Column(
-            nullable = false,
-            unique = true
-    )
+    @Column(name = "phone", nullable = false, unique = true)
     private String phone;
 
-
-
-
-
-    // ==============================
-    // PASSWORD
-    // ==============================
-
-    /*
-       BCrypt encrypted password
-       Example:
-       $2a$10$xxxxxxxxxxxxxxxxxxxx
-    */
-
     @JsonIgnore
-    @Column(
-            nullable = false,
-            length = 255
-    )
+    @Column(name = "password", nullable = false, length = 255)
     private String password;
 
-
-
-
-
-    // ==============================
-    // FULL NAME
-    // ==============================
-
-    @Column(
-            name = "full_name"
-    )
+    @Column(name = "full_name")
     private String fullName;
 
-
-
-
-
-    // ==============================
-    // OTP
-    // ==============================
-
-    @Column
+    @Column(name = "otp")
     private String otp;
 
+    @Column(name = "role", nullable = false)
+    private String role;
 
-
-
-
-    // ==============================
-    // ROLE
-    // ADMIN
-    // PHARMACIST
-    // STAFF
-    // ==============================
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(
-            name = "role_id",
-            nullable = false
-    )
-    private Role role;
-
-
-
-
-
-    // ==============================
-    // CREATED DATE
-    // ==============================
-
-    @Column(
-            name = "created_at",
-            updatable = false
-    )
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-
-
-
-
-    // ==============================
-    // BEFORE SAVE
-    // ==============================
-
     @PrePersist
-    public void prePersist(){
-
-        if(createdAt == null){
-
+    public void prePersist() {
+        if (createdAt == null) {
             createdAt = LocalDateTime.now();
-
         }
-
     }
+    public boolean isApproved() {
+    return approved;
+}
 
-
-
+public void setApproved(boolean approved) {
+    this.approved = approved;
+}
 }

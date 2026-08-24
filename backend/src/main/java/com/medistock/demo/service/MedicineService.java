@@ -140,14 +140,7 @@ public class MedicineService {
         createExpiryTracking(saved);
 
 
-
-        notificationService.medicineAdded(
-
-                saved.getName(),
-
-                saved.getQuantity()
-
-        );
+notificationService.medicineAdded(saved);
 
 
 

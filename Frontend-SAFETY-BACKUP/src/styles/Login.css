@@ -1,0 +1,329 @@
+.login-page{
+
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:#f4f6f9;
+
+}
+
+
+
+.login-card{
+
+    width:400px;
+    padding:35px;
+    background:white;
+    border-radius:15px;
+    box-shadow:0 5px 20px rgba(0,0,0,0.2);
+    text-align:center;
+
+}
+
+
+
+.logo-title{
+
+    font-size:32px;
+    color:#0b3d91;
+    margin-bottom:25px;
+
+}
+
+
+
+/* Admin Pharmacist */
+
+.role-options {
+    display: flex;
+    justify-content: space-between;
+    gap: 25px;
+    width: 100%;
+}
+
+
+.role-section label{
+
+    display:flex;
+    align-items:center;
+    gap:8px;
+    color:#333;
+    font-weight:500;
+    cursor:pointer;
+
+}
+
+
+
+.role-section input{
+
+    accent-color:#0b3d91;
+
+}
+
+
+
+/* Labels */
+
+.form-label{
+
+    display:block;
+    text-align:left;
+    font-weight:bold;
+    color:#333;
+    margin-top:15px;
+    margin-bottom:8px;
+
+}
+
+
+
+/* Input Boxes */
+
+.input-box{
+
+    display:flex;
+    align-items:center;
+    gap:10px;
+
+    background:#f1f4f8;
+
+    padding:12px;
+
+    margin-bottom:15px;
+
+    border-radius:8px;
+
+}
+
+
+
+.input-box input{
+
+    border:none;
+    outline:none;
+    background:transparent;
+
+    width:100%;
+
+    font-size:15px;
+
+}
+
+
+
+/* Login Button */
+
+.login-btn{
+
+    width:100%;
+
+    padding:12px;
+
+    background:#0b3d91;
+
+    color:white;
+
+    border:none;
+
+    border-radius:8px;
+
+    font-size:16px;
+
+    cursor:pointer;
+
+}
+
+
+
+.login-btn:hover{
+
+    background:#06275f;
+
+}
+/* Input text color */
+
+.input-box input{
+
+    color:#222;
+
+}
+
+
+/* Placeholder text color */
+
+.input-box input::placeholder{
+
+    color:#777;
+
+}
+
+
+/* Email and Password icons */
+
+.input-box svg{
+
+    color:#0b3d91;
+
+    font-size:18px;
+
+}
+
+
+/* Password typed text visibility */
+
+.input-box input[type="password"]{
+
+    color:#000;
+
+}
+/* Welcome */
+
+.welcome-title{
+
+    font-size:36px;
+
+    color:#1565c0;
+
+    margin-bottom:10px;
+
+    text-align:center;
+
+}
+
+.welcome-subtitle{
+
+    color:#666;
+
+    text-align:center;
+
+    margin-bottom:15px;
+
+}
+
+/* Role */
+
+.role-heading{
+
+    font-size:24px;
+
+    color:#222;
+
+    margin-top:10px;
+
+    text-align:center;
+
+}
+
+.role-cards {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 35px;
+    width: 100%;
+}
+.role-card {
+    width: 90px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.role-icon {
+    font-size: 35px;
+    margin-bottom: 5px;
+}
+
+
+.role-card p {
+    margin: 0;
+    font-size: 18px;
+}
+.role-card:hover{
+
+    transform:translateY(-5px);
+
+    border-color:#1565c0;
+
+}
+
+.role-card.active{
+
+    background:#1565c0;
+
+    color:white;
+
+    border-color:#1565c0;
+
+}
+
+.role-icon{
+
+    font-size:42px;
+
+    margin-bottom:10px;
+
+}
+
+.login-links{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    margin-top:15px;
+
+    font-size:14px;
+
+}
+
+.login-links span{
+
+    color:#1565c0;
+
+    cursor:pointer;
+
+    font-weight:600;
+
+}
+
+.login-links span:hover{
+
+    text-decoration:underline;
+
+}
+.role-selection {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin: 20px 0;
+}
+
+.role-selection label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 15px;
+}
+.login-card {
+    width: 550px;
+}
+.role-cards {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 15px !important;
+    width: 100% !important;
+}
+
+.role-card {
+    width: 110px !important;
+    height: 80px !important;
+    flex-shrink: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+}

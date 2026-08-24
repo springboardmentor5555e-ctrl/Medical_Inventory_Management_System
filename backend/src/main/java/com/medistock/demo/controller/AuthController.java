@@ -1,11 +1,11 @@
 package com.medistock.demo.controller;
 
-
 import com.medistock.demo.dto.AuthResponse;
 import com.medistock.demo.dto.LoginRequest;
 import com.medistock.demo.dto.RegisterRequest;
 import com.medistock.demo.dto.OtpRequest;
 import com.medistock.demo.dto.OtpVerifyRequest;
+import com.medistock.demo.dto.ForgotPasswordRequest;
 
 import com.medistock.demo.entity.User;
 
@@ -15,19 +15,13 @@ import com.medistock.demo.service.AuthService;
 import com.medistock.demo.service.OtpService;
 import com.medistock.demo.service.JwtService;
 
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-
-
-
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:5173")
 public class AuthController {
-
-
 
     private final AuthService authService;
 
@@ -272,11 +266,7 @@ public class AuthController {
 
 
 
-        String role = user.getRole()
-
-                .getRoleName()
-
-                .toUpperCase();
+        String role = user.getRole().toUpperCase();
 
 
 
@@ -325,11 +315,24 @@ public class AuthController {
                 )
 
         );
+        
 
 
 
     }
 
+// ================= FORGOT PASSWORD =================
 
+@PostMapping("/forgot-password")
+public ResponseEntity<String> forgotPassword(
+        @RequestBody ForgotPasswordRequest request
+) {
+
+    authService.forgotPassword(request.getEmail());
+
+    return ResponseEntity.ok(
+            "New password has been sent to your email"
+    );
+}
 
 }

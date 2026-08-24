@@ -30,7 +30,18 @@ function AddUser() {
 
     try {
 
-        await api.post("/users", user);
+        const token = localStorage.getItem("token");
+
+        await api.post(
+            "/users",
+            user,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                }
+            }
+        );
 
         alert("User Added Successfully!");
 
@@ -38,7 +49,8 @@ function AddUser() {
 
     } catch (error) {
 
-        console.log(error);
+        console.log("Save user error:", error);
+        console.log("Response:", error.response?.data);
 
         alert("Failed to save user!");
 

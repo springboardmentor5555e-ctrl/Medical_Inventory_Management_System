@@ -7,7 +7,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/medicines")
@@ -48,6 +50,44 @@ public class MedicineController {
         return ResponseEntity.ok(medicines);
 
     }
+
+
+// =====================================================
+// DASHBOARD SUMMARY
+// =====================================================
+
+@GetMapping("/dashboard-summary")
+public ResponseEntity<?> getDashboardSummary() {
+
+    Map<String, Object> summary = new HashMap<>();
+
+    summary.put(
+            "totalMedicines",
+            medicineService.getTotalMedicines()
+    );
+
+    summary.put(
+            "totalStock",
+            medicineService.getTotalStock()
+    );
+
+    summary.put(
+            "lowStockMedicines",
+            medicineService.getLowStockCount()
+    );
+
+    summary.put(
+            "expiredMedicines",
+            medicineService.getExpiredCount()
+    );
+
+    summary.put(
+            "inventoryValue",
+            medicineService.getInventoryValue()
+    );
+
+    return ResponseEntity.ok(summary);
+}
 
 
     // =====================================================

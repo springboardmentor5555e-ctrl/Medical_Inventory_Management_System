@@ -1,13 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FaEnvelope, FaLock } from "react-icons/fa";
 
-import {
-    FaEnvelope,
-    FaLock
-} from "react-icons/fa";
-
+import api from "../services/api";
 import "../styles/Login.css";
-
 
 function Login() {
 
@@ -17,282 +13,311 @@ function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
 
-    e.preventDefault();
+        e.preventDefault();
 
-    // ===========================
-    // PHARMACIST LOGIN
-    // ===========================
-if (role === "Pharmacist") {
+        if (!role) {
+            alert("Please select your role");
+            return;
+        }
 
-    if (email.trim() !== "" && password.trim() !== "") {
+        if (!email.trim() || !password.trim()) {
+            alert("Please enter email and password");
+            return;
+        }
 
-        navigate("/pharmacist-dashboard");
-        return;
+        try {
 
-    } else {
+            // ==========================================
+            // LOGIN THROUGH SPRING BOOT BACKEND
+            // ==========================================
 
-        alert("Please enter email and password");
-        return;
+            const response = await api.post(
+                "/auth/login",
+                {
+                    email: email.trim(),
+                    password: password
+                }
+            );
 
-    }
+            console.log("Login response:", response.data);
 
-}
-// ===========================
-// STAFF LOGIN
-// ===========================
-if (role === "Staff") {
+            // ==========================================
+            // GET JWT FROM BACKEND
+            // ==========================================
 
-    if (email.trim() !== "" && password.trim() !== "") {
+            const token = response.data.token;
+            const backendRole = response.data.role;
+            const userId = response.data.userId;
 
-        localStorage.setItem("role", "Staff");
+            if (!token) {
 
-        navigate("/staff-dashboard");
-        return;
+                alert("Login failed: JWT token was not received.");
+                return;
 
-    } else {
+            }
 
-        alert("Please enter email and password");
-        return;
+            // ==========================================
+            // SAVE JWT
+            // ==========================================
 
-    }
+            localStorage.setItem(
+                "token",
+                token
+            );
 
-}
-    // ===========================
-    // ADMIN LOGIN
-    // ===========================
-    const savedUser = JSON.parse(localStorage.getItem("user"));
+            // ==========================================
+            // SAVE ROLE
+            // ==========================================
 
-    if (!savedUser) {
+            localStorage.setItem(
+                "role",
+                backendRole
+            );
 
-        localStorage.setItem(
-            "user",
-            JSON.stringify({
-                email: email,
-                password: password,
-                role: role
-            })
-        );
+            // ==========================================
+            // SAVE USER ID
+            // ==========================================
 
-        alert("Admin account created successfully");
+            if (userId !== undefined && userId !== null) {
 
-      localStorage.setItem("role", "admin");
-navigate("/admin-dashboard");
+                localStorage.setItem(
+                    "userId",
+                    userId
+                );
 
-    } else {
+            }
 
-        if (
-            savedUser.email === email &&
-            savedUser.password === password
-        ) {
+            // ==========================================
+            // NORMALIZE ROLE
+            // ==========================================
 
-       if (role === "admin") {
+            const normalizedRole =
+                String(backendRole)
+                    .replace("ROLE_", "")
+                    .toUpperCase();
 
-    localStorage.setItem("role", "admin");
-    navigate("/admin-dashboard");
+            // ==========================================
+            // NAVIGATION
+            // ==========================================
 
-} else if (role === "Pharmacist") {
+            if (normalizedRole === "ADMIN") {
 
-    localStorage.setItem("role", "Pharmacist");
-    navigate("/pharmacist-dashboard");
+                navigate("/admin-dashboard");
 
-} else if (role === "Staff") {
+            } else if (normalizedRole === "PHARMACIST") {
 
-    localStorage.setItem("role", "Staff");
-    navigate("/staff-dashboard");
+                navigate("/pharmacist-dashboard");
 
-}
+            } else if (normalizedRole === "STAFF") {
 
-        } else if (
-            savedUser.email === email &&
-            savedUser.password !== password
-        ) {
+                navigate("/staff-dashboard");
 
-            alert("Invalid Password");
+            } else {
 
-        } else {
+                alert(
+                    "Login successful, but the user role is not recognized: "
+                    + backendRole
+                );
 
-            alert("Email not registered");
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Login error:",
+                error
+            );
+
+            console.error(
+                "Login response:",
+                error.response?.data
+            );
+
+            if (error.response?.status === 401) {
+
+                alert(
+                    "Invalid email or password"
+                );
+
+            } else if (error.response?.status === 403) {
+
+                alert(
+                    "You are not authorized to login."
+                );
+
+            } else {
+
+                alert(
+                    error.response?.data?.message ||
+                    "Login failed. Please try again."
+                );
+
+            }
 
         }
 
-    }
-
-};
-
+    };
 
     return (
 
         <div className="login-page">
 
-
             <div className="login-card">
 
-
-
                 <h1 className="logo-title">
-
                     💊 MediStock
-
                 </h1>
 
-
-
-
                 <form onSubmit={handleLogin}>
+
                     <div className="role-section">
 
-    <h2 className="welcome-title">
-        Welcome Back!
-    </h2>
+                        <h2 className="welcome-title">
+                            Welcome Back!
+                        </h2>
 
-    <p className="welcome-subtitle">
-        Sign in to continue to your account
-    </p>
+                        <p className="welcome-subtitle">
+                            Sign in to continue to your account
+                        </p>
 
-    <h3 className="role-heading">
-        Select Your Role
-    </h3>
-<div className="role-cards">
+                        <h3 className="role-heading">
+                            Select Your Role
+                        </h3>
 
-    <div
-        className={`role-card ${role === "admin" ? "active" : ""}`}
-        onClick={() => setRole("admin")}
-    >
-        <div className="role-icon">👨‍💼</div>
-        <p>Admin</p>
-    </div>
+                        <div className="role-cards">
 
-    <div
-        className={`role-card ${role === "Pharmacist" ? "active" : ""}`}
-        onClick={() => setRole("Pharmacist")}
-    >
-        <div className="role-icon">💊</div>
-        <p>Pharmacist</p>
-    </div>
+                            <div
+                                className={`role-card ${
+                                    role === "admin"
+                                        ? "active"
+                                        : ""
+                                }`}
+                                onClick={() =>
+                                    setRole("admin")
+                                }
+                            >
+                                <div className="role-icon">
+                                    👨‍💼
+                                </div>
 
-    <div
-        className={`role-card ${role === "Staff" ? "active" : ""}`}
-        onClick={() => setRole("Staff")}
-    >
-        <div className="role-icon">👩‍⚕️</div>
-        <p>Staff</p>
-    </div>
+                                <p>Admin</p>
+                            </div>
 
-</div>
-</div>   {/*// closes role-section*/}
+                            <div
+                                className={`role-card ${
+                                    role === "Pharmacist"
+                                        ? "active"
+                                        : ""
+                                }`}
+                                onClick={() =>
+                                    setRole("Pharmacist")
+                                }
+                            >
+                                <div className="role-icon">
+                                    💊
+                                </div>
+
+                                <p>Pharmacist</p>
+                            </div>
+
+                            <div
+                                className={`role-card ${
+                                    role === "Staff"
+                                        ? "active"
+                                        : ""
+                                }`}
+                                onClick={() =>
+                                    setRole("Staff")
+                                }
+                            >
+                                <div className="role-icon">
+                                    👩‍⚕️
+                                </div>
+
+                                <p>Staff</p>
+                            </div>
+
+                        </div>
+
+                    </div>
 
                     <label className="form-label">
-
                         Email Address
-
                     </label>
-
-
 
                     <div className="input-box">
 
-
-                        <FaEnvelope/>
-
+                        <FaEnvelope />
 
                         <input
-
-                        type="email"
-
-                        placeholder="Enter your email"
-
-                        value={email}
-
-                        onChange={(e)=>setEmail(e.target.value)}
-
+                            type="email"
+                            placeholder="Enter your email"
+                            value={email}
+                            onChange={(e) =>
+                                setEmail(e.target.value)
+                            }
                         />
 
-
                     </div>
-
-
-
-
-
 
                     <label className="form-label">
-
                         Password
-
                     </label>
-
-
 
                     <div className="input-box">
 
-
-                        <FaLock/>
-
+                        <FaLock />
 
                         <input
-
-                        type="password"
-
-                        placeholder="Enter your password"
-
-                        value={password}
-
-                        onChange={(e)=>setPassword(e.target.value)}
-
+                            type="password"
+                            placeholder="Enter your password"
+                            value={password}
+                            onChange={(e) =>
+                                setPassword(e.target.value)
+                            }
                         />
-
 
                     </div>
 
-
-
-
-
-
-
-                    <button className="login-btn">
-
-
+                    <button
+                        className="login-btn"
+                        type="submit"
+                    >
                         Login
-
-
                     </button>
-                     <div className="login-links">
 
-    <span
-        className="forgot-password"
-        onClick={() => navigate("/forgot-password")}
-    >
-        Forgot Password?
-    </span>
+                    <div className="login-links">
 
-    <span
-        className="register-link"
-        onClick={() => navigate("/register")}
-    >
-        Register Here
-    </span>
+                        <span
+                            className="forgot-password"
+                            onClick={() =>
+                                navigate("/forgot-password")
+                            }
+                        >
+                            Forgot Password?
+                        </span>
 
-</div>
+                        <span
+                            className="register-link"
+                            onClick={() =>
+                                navigate("/register")
+                            }
+                        >
+                            Register Here
+                        </span>
 
-
+                    </div>
 
                 </form>
 
-
-
             </div>
-
-
 
         </div>
 
     );
 
-
 }
-
 
 export default Login;

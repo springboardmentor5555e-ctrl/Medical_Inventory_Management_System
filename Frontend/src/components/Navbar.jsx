@@ -25,6 +25,9 @@ function Navbar(){
                 <Link to="/reports">
                     Reports
                 </Link>
+                <Link to="/analytics">
+    Analytics
+</Link>
                 
 
             </div>

@@ -1,0 +1,51 @@
+.suppliers-container{
+    padding:30px;
+}
+
+.suppliers-container h2{
+    margin-bottom:20px;
+    text-align:center;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:white;
+}
+
+table th{
+    background:#007bff;
+    color:white;
+    padding:12px;
+}
+
+table td{
+    padding:12px;
+    text-align:center;
+    border:1px solid #ddd;
+}.suppliers-container{
+    padding:30px;
+}
+
+.suppliers-container h2{
+    margin-bottom:20px;
+    text-align:center;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:white;
+}
+
+table th{
+    background:#007bff;
+    color:white;
+    padding:12px;
+}
+
+table td{
+    padding:12px;
+    text-align:center;
+    border:1px solid #ddd;
+}

@@ -1,0 +1,67 @@
+.pharmacist-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-top: 25px;
+}
+
+.pharmacist-cards .card {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    text-align: center;
+}
+
+.pharmacist-cards .card h3 {
+    margin-bottom: 12px;
+    color: #444;
+}
+
+.pharmacist-cards .card p {
+    font-size: 30px;
+    font-weight: bold;
+    color: #1976d2;
+}
+.dashboard-content{
+    padding:30px;
+}
+
+.pharmacist-cards{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:20px;
+    margin-top:25px;
+}
+
+.card{
+    background:#fff;
+    border-radius:12px;
+    padding:25px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.08);
+    text-align:center;
+}
+
+.card h3{
+    color:#444;
+    margin-bottom:10px;
+}
+
+.card p{
+    font-size:32px;
+    color:#1976d2;
+    font-weight:bold;
+}
+.profile {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.profile-image {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid white;
+    margin-bottom: 10px;
+}

@@ -1,0 +1,153 @@
+/* Page Background */
+
+.medicine-page{
+    min-height:100vh;
+    background:#eaf4ff;
+    padding:30px;
+}
+
+/* Back Button */
+
+.back-btn{
+    font-size:28px;
+    color:#0b5ed7;
+    cursor:pointer;
+    margin-bottom:20px;
+}
+
+.back-btn:hover{
+    color:#084298;
+}
+
+/* Main Card */
+
+.medicine-card{
+    background:white;
+    padding:25px;
+    border-radius:15px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.15);
+}
+
+/* Heading */
+
+.medicine-card h2{
+    text-align:center;
+    color:#0b5ed7;
+    margin-bottom:20px;
+}
+
+/* Table */
+/* Table */
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:white;
+}
+
+table th{
+    background:#0b5ed7;
+    color:white;
+    padding:12px;
+    font-size:15px;
+    font-weight:600;
+}
+
+table td{
+    padding:12px;
+    text-align:center;
+    border-bottom:1px solid #ddd;
+    font-size:14px;
+    color:#222;          /* ← Make text black */
+    font-weight:500;
+    background:white;
+}
+
+table tr:nth-child(even){
+    background:#f8fbff;
+}
+
+table tr:hover td{
+    background:#e8f2ff;
+}
+
+/* Buttons */
+
+.edit-btn{
+    background:#ffc107;
+    color:white;
+    border:none;
+    padding:8px 12px;
+    border-radius:6px;
+    cursor:pointer;
+    margin-right:8px;
+}
+
+.delete-btn{
+    background:#dc3545;
+    color:white;
+    border:none;
+    padding:8px 12px;
+    border-radius:6px;
+    cursor:pointer;
+}
+/* Search Header */
+
+.medicine-header {
+    display: grid;
+    grid-template-columns: 60px 1fr auto;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.page-title {
+    text-align: center;
+    margin: 0;
+    font-size: 28px;
+    font-weight: 600;
+}
+
+
+.search-box {
+    width: 200px;      /* Increase width */
+    height: 40px;      /* Increase height */
+    padding: 0 15px;
+    font-size: 16px;
+    border-radius: 8px;
+}
+
+.search-box:focus{
+
+border-color:#2563eb;
+box-shadow:0 0 5px rgba(37,99,235,0.3);
+
+}
+.filters {
+    display: flex;
+    gap: 12px;
+    justify-self: end;
+}
+
+.category-filter {
+    width: 200px;      /* Increase width */
+    height: 40px;      /* Increase height */
+    padding: 0 12px;
+    font-size: 16px;
+    border-radius: 8px;
+}
+
+.category-filter:focus{
+
+border-color:#2563eb;
+box-shadow:0 0 5px rgba(37,99,235,0.3);
+
+}
+.back-btn{
+    font-size:24px;
+    cursor:pointer;
+    margin-bottom:20px;
+    color:#2563eb;
+}
+
+.back-btn:hover{
+    color:#1d4ed8;
+}

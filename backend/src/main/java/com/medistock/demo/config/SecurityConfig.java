@@ -15,28 +15,21 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-
 @Configuration
 public class SecurityConfig {
 
-
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-
 
     public SecurityConfig(
             JwtAuthenticationFilter jwtAuthenticationFilter
     ) {
-
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-
     }
-
 
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http
     ) throws Exception {
-
 
         http
 
@@ -48,7 +41,6 @@ public class SecurityConfig {
                 csrf -> csrf.disable()
         )
 
-
         // ==================================================
         // CORS
         // ==================================================
@@ -56,7 +48,6 @@ public class SecurityConfig {
         .cors(
                 Customizer.withDefaults()
         )
-
 
         // ==================================================
         // SESSION
@@ -68,13 +59,11 @@ public class SecurityConfig {
                 )
         )
 
-
         // ==================================================
         // AUTHORIZATION
         // ==================================================
 
         .authorizeHttpRequests(auth -> auth
-
 
                 // ==================================================
                 // CORS OPTIONS
@@ -86,20 +75,57 @@ public class SecurityConfig {
                 )
                 .permitAll()
 
-
                 // ==================================================
                 // PUBLIC
                 // ==================================================
-                .requestMatchers(
-        "/",
-        "/error",
-        "/favicon.ico",
-        "/api/auth/**",
-        "/api/auth/login",
-        "/api/auth/register"
-)
-.permitAll()
 
+                .requestMatchers(
+                        "/",
+                        "/error",
+                        "/favicon.ico",
+                        "/api/auth/**"
+                )
+                .permitAll()
+
+                // ==================================================
+                // VIEW MEDICINES
+                // ==================================================
+
+                .requestMatchers(
+                        HttpMethod.GET,
+                        "/api/medicines/**"
+                )
+                .permitAll()
+
+                // ==================================================
+                // ADD MEDICINES
+                // ==================================================
+
+                .requestMatchers(
+                        HttpMethod.POST,
+                        "/api/medicines/**"
+                )
+                .permitAll()
+
+                // ==================================================
+                // EDIT MEDICINES
+                // ==================================================
+
+                .requestMatchers(
+                        HttpMethod.PUT,
+                        "/api/medicines/**"
+                )
+                .hasRole("ADMIN")
+
+                // ==================================================
+                // DELETE MEDICINES
+                // ==================================================
+
+                .requestMatchers(
+                        HttpMethod.DELETE,
+                        "/api/medicines/**"
+                )
+                .hasRole("ADMIN")
 
                 // ==================================================
                 // USER PROFILE
@@ -112,7 +138,6 @@ public class SecurityConfig {
                 )
                 .authenticated()
 
-
                 // ==================================================
                 // ADMIN USER MANAGEMENT
                 // ==================================================
@@ -123,10 +148,8 @@ public class SecurityConfig {
                 )
                 .hasRole("ADMIN")
 
-
                 // ==================================================
                 // DASHBOARD
-                // ADMIN + PHARMACIST + STAFF
                 // ==================================================
 
                 .requestMatchers(
@@ -138,37 +161,8 @@ public class SecurityConfig {
                         "STAFF"
                 )
 
-
-                // ==================================================
-                // VIEW MEDICINES
-                // ADMIN + PHARMACIST + STAFF
-                // ==================================================
-
-                .requestMatchers(
-                        HttpMethod.GET,
-                        "/api/medicines/**"
-                )
-                .hasAnyRole(
-                        "ADMIN",
-                        "PHARMACIST",
-                        "STAFF"
-                )
-
-
-                // ==================================================
-                // ADD / EDIT / DELETE MEDICINES
-                // ADMIN ONLY
-                // ==================================================
-
-                .requestMatchers(
-                        "/api/medicines/**"
-                )
-                .hasRole("ADMIN")
-
-
                 // ==================================================
                 // NOTIFICATIONS
-                // ADMIN + PHARMACIST + STAFF
                 // ==================================================
 
                 .requestMatchers(
@@ -180,26 +174,51 @@ public class SecurityConfig {
                         "STAFF"
                 )
 
-
                 // ==================================================
                 // ADMIN MODULES
                 // ==================================================
+/// ==================================================
+// SUPPLIERS
+// ==================================================
 
-                .requestMatchers(
-                        "/api/suppliers/**",
-                        "/api/stock-logs/**",
-                        "/api/stock-alerts/**",
-                        "/api/expiry/**",
-                        "/api/analytics/**",
-                        "/api/reports/**",
-                        "/api/purchase-orders/**"
-                )
-                .hasRole("ADMIN")
+.requestMatchers(
+        HttpMethod.GET,
+        "/api/suppliers/**"
+)
+.permitAll()
 
+.requestMatchers(
+        HttpMethod.POST,
+        "/api/suppliers/**"
+)
+.permitAll()
 
+.requestMatchers(
+        HttpMethod.PUT,
+        "/api/suppliers/**"
+)
+.permitAll()
+
+.requestMatchers(
+        HttpMethod.DELETE,
+        "/api/suppliers/**"
+)
+.permitAll()
+// ==================================================
+// OTHER ADMIN MODULES
+// ==================================================
+
+.requestMatchers(
+        "/api/stock-logs/**",
+        "/api/stock-alerts/**",
+        "/api/expiry/**",
+        "/api/analytics/**",
+        "/api/reports/**",
+        "/api/purchase-orders/**"
+)
+.hasRole("ADMIN")
                 // ==================================================
                 // SALES
-                // ADMIN + PHARMACIST
                 // ==================================================
 
                 .requestMatchers(
@@ -210,7 +229,6 @@ public class SecurityConfig {
                         "PHARMACIST"
                 )
 
-
                 // ==================================================
                 // PHARMACIST MODULES
                 // ==================================================
@@ -220,12 +238,8 @@ public class SecurityConfig {
                 )
                 .hasRole("PHARMACIST")
 
-
                 // ==================================================
                 // ADMIN STOCK UPDATE
-                //
-                // IMPORTANT:
-                // This must come BEFORE /api/staff/**
                 // ==================================================
 
                 .requestMatchers(
@@ -234,29 +248,29 @@ public class SecurityConfig {
                 )
                 .hasRole("ADMIN")
 
-
                 // ==================================================
                 // STAFF MODULES
-                //
-                // STAFF CAN ACCESS STAFF APIs
-                // BUT STOCK UPDATE ABOVE IS ADMIN ONLY
                 // ==================================================
 
                 .requestMatchers(
                         "/api/staff/**"
                 )
                 .hasRole("STAFF")
+// ==================================================
+// ADMIN REGISTRATION REQUESTS
+// ==================================================
 
-
+.requestMatchers(
+        "/api/admin/registration-requests/**"
+)
+.hasRole("ADMIN")
                 // ==================================================
                 // EVERYTHING ELSE
                 // ==================================================
-
+                
                 .anyRequest()
                 .authenticated()
-
         )
-
 
         // ==================================================
         // DISABLE DEFAULT LOGIN
@@ -266,11 +280,9 @@ public class SecurityConfig {
                 form -> form.disable()
         )
 
-
         .httpBasic(
                 basic -> basic.disable()
         );
-
 
         // ==================================================
         // JWT FILTER
@@ -281,11 +293,8 @@ public class SecurityConfig {
                 UsernamePasswordAuthenticationFilter.class
         );
 
-
         return http.build();
-
     }
-
 
     // ==================================================
     // PASSWORD ENCODER
@@ -295,7 +304,5 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
 
         return new BCryptPasswordEncoder();
-
     }
-
 }

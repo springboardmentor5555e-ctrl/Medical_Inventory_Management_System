@@ -1,0 +1,2011 @@
+/* =====================================================
+   MEDISTOCK PROFESSIONAL GLOBAL THEME
+===================================================== */
+
+* {
+    box-sizing: border-box;
+}
+
+
+html,
+body {
+
+    margin:0;
+
+    padding:0;
+
+    width:100%;
+
+    min-height:100%;
+
+    font-family:
+    "Segoe UI",
+    "Poppins",
+    Arial,
+    sans-serif;
+
+}
+
+
+/* =====================================================
+   PROFESSIONAL MEDICAL BACKGROUND
+===================================================== */
+
+
+.auth-container {
+
+    min-height:100vh;
+
+    width:100%;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    gap:60px;
+
+    padding:40px;
+
+    background-size:cover;
+
+    background-position:center;
+
+    position:relative;
+
+    overflow:hidden;
+
+}
+
+
+
+
+/* Animated medical atmosphere */
+
+
+.auth-container::before {
+
+
+    content:"";
+
+    position:absolute;
+
+    inset:-50px;
+
+
+    background:
+
+    radial-gradient(
+        circle at top left,
+        rgba(0,255,255,.25),
+        transparent 35%
+    ),
+
+
+    radial-gradient(
+        circle at bottom right,
+        rgba(0,110,255,.35),
+        transparent 40%
+    );
+
+
+    animation:
+
+    medicalGlow 8s infinite alternate;
+
+
+}
+
+
+
+
+@keyframes medicalGlow {
+
+
+    from{
+
+        transform:scale(1);
+
+    }
+
+
+    to{
+
+        transform:scale(1.15);
+
+    }
+
+
+}
+
+
+
+
+
+
+
+/* Floating medical particles */
+
+
+.auth-container::after {
+
+
+    content:"⚕   +   ✚   💊   🩺";
+
+
+    position:absolute;
+
+
+    width:100%;
+
+
+    top:20%;
+
+
+    left:0;
+
+
+    color:
+
+    rgba(255,255,255,.15);
+
+
+    font-size:70px;
+
+
+    letter-spacing:80px;
+
+
+    animation:
+
+    floatMedical 12s linear infinite;
+
+
+}
+
+
+
+@keyframes floatMedical {
+
+
+    0%{
+
+        transform:
+        translateX(-20px)
+        translateY(40px);
+
+    }
+
+
+    50%{
+
+        transform:
+        translateX(40px)
+        translateY(-40px);
+
+    }
+
+
+    100%{
+
+        transform:
+        translateX(-20px)
+        translateY(40px);
+
+    }
+
+}
+
+
+
+
+
+
+
+/* =====================================================
+   LEFT BRAND SECTION
+===================================================== */
+
+
+.auth-left {
+
+
+    width:420px;
+
+    color:white;
+
+    z-index:2;
+
+    animation:
+
+    slideLeft .8s ease;
+
+
+}
+
+
+
+@keyframes slideLeft {
+
+
+from{
+
+    opacity:0;
+
+    transform:translateX(-80px);
+
+}
+
+
+to{
+
+    opacity:1;
+
+    transform:translateX(0);
+
+}
+
+
+}
+
+
+
+
+.brand h1 {
+
+
+    font-size:55px;
+
+    font-weight:900;
+
+    margin-bottom:10px;
+
+
+    text-shadow:
+
+    0 10px 30px rgba(0,0,0,.3);
+
+
+}
+
+
+
+.brand p {
+
+
+    font-size:22px;
+
+    opacity:.95;
+
+    line-height:1.5;
+
+}
+
+
+
+
+
+.feature-list {
+
+
+    margin-top:40px;
+
+
+}
+
+
+
+
+.feature-list div {
+
+
+    margin:20px 0;
+
+
+    padding:15px 20px;
+
+
+    border-radius:18px;
+
+
+    background:
+
+    rgba(255,255,255,0.8);
+
+
+    backdrop-filter:
+
+    blur(15px);
+    -webkit-backdrop-filter:blur(15px);
+
+
+    border:
+
+    1px solid rgba(255,255,255,.3);
+
+
+    font-size:18px;
+
+
+    transition:.3s;
+
+
+}
+
+
+
+.feature-list div:hover {
+
+
+    transform:
+
+    translateX(12px);
+
+
+    background:
+
+    rgba(255,255,255,.3);
+
+
+}
+
+
+
+
+
+
+/* =====================================================
+   GLASS AUTH CARD
+===================================================== */
+
+
+.auth-card {
+
+
+    width:460px;
+
+
+    padding:45px;
+
+
+    border-radius:35px;
+
+
+    position:relative;
+
+
+    z-index:3;
+
+
+    background:
+
+
+    rgba(255,255,255,.15);
+
+
+
+    backdrop-filter:
+
+    blur(25px);
+
+
+
+    -webkit-backdrop-filter:
+
+    blur(25px);
+
+
+
+    border:
+
+    1px solid rgba(255,255,255,.35);
+
+
+
+    box-shadow:
+
+
+    0 30px 70px
+
+    rgba(0,0,0,.35);
+
+
+
+    animation:
+
+    cardAnimation .8s ease;
+
+
+
+}
+
+
+
+
+@keyframes cardAnimation {
+
+
+from{
+
+
+    opacity:0;
+
+    transform:
+
+    translateY(70px)
+
+    scale(.9);
+
+
+}
+
+
+
+to{
+
+
+    opacity:1;
+
+    transform:
+
+    translateY(0)
+
+    scale(1);
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+.register-card {
+
+
+    width:500px;
+
+
+}
+
+
+
+
+
+/* =====================================================
+   MEDICAL ICON
+===================================================== */
+
+
+.medical-icon {
+
+
+    text-align:center;
+
+
+    font-size:75px;
+
+
+    margin-bottom:15px;
+
+
+    animation:
+
+
+    pulseMedical 3s infinite;
+
+
+}
+
+
+
+
+@keyframes pulseMedical {
+
+
+0%,100%{
+
+    transform:translateY(0);
+
+}
+
+
+50%{
+
+    transform:translateY(-15px);
+
+}
+
+
+}
+
+
+
+
+
+/* =====================================================
+   TITLE
+===================================================== */
+
+
+.title {
+
+
+    text-align:center;
+
+
+    color:white;
+
+
+    font-size:34px;
+
+
+    font-weight:900;
+
+
+    margin-bottom:25px;
+
+
+}
+
+
+
+
+
+
+
+/* =====================================================
+   INPUT DESIGN
+===================================================== */
+
+
+.input-group {
+
+
+    display:flex;
+
+
+    align-items:center;
+
+
+    gap:12px;
+
+
+    margin-top:18px;
+
+
+    padding:0 18px;
+
+
+    background:
+
+    rgba(255,255,255,.95);
+
+
+    border-radius:18px;
+
+
+    transition:.3s;
+
+
+}
+
+
+
+
+.input-group svg {
+
+
+    color:#0077b6;
+
+
+    font-size:18px;
+
+
+}
+
+
+
+
+
+.input-group input {
+
+
+    flex:1;
+
+
+    border:none;
+
+
+    outline:none;
+
+
+    padding:16px 5px;
+
+
+    background:transparent;
+
+
+    font-size:16px;
+
+
+}
+
+
+
+
+
+.input-group:focus-within {
+
+
+    transform:
+
+    scale(1.03);
+
+
+    box-shadow:
+
+    0 0 25px
+
+    rgba(0,220,255,.7);
+
+
+}
+
+
+
+
+
+
+/* =====================================================
+   PASSWORD EYE
+===================================================== */
+
+
+.password-wrapper {
+
+
+    position:relative;
+
+
+}
+
+
+
+
+.eye-btn {
+
+
+    position:absolute;
+
+
+    right:15px;
+
+
+    top:50%;
+
+
+    transform:
+
+    translateY(-50%);
+
+
+    width:auto;
+
+
+    margin:0;
+
+
+    padding:5px;
+
+
+    background:none;
+
+
+    color:#0077b6;
+
+
+}
+
+
+.eye-btn:hover {
+
+
+    background:none;
+
+
+    transform:
+
+    translateY(-50%)
+
+    scale(1.2);
+
+
+}
+
+
+
+
+
+
+
+/* =====================================================
+   ROLE SELECTION
+===================================================== */
+
+
+.role-title {
+
+
+    text-align:center;
+
+
+    color:white;
+
+
+    margin-top:25px;
+
+
+}
+
+
+
+
+
+.role-box {
+
+
+    display:grid;
+
+
+    grid-template-columns:
+
+    repeat(3,1fr);
+
+
+    gap:15px;
+
+
+    margin-top:15px;
+
+
+}
+
+
+
+
+.role {
+
+
+    display:flex;
+
+
+    flex-direction:column;
+
+
+    align-items:center;
+
+
+    justify-content:center;
+
+
+    gap:8px;
+
+
+    padding:18px 10px;
+
+
+    border-radius:22px;
+
+
+    background:
+
+
+    rgba(255,255,255,.18);
+
+
+    color:white;
+
+
+    border:
+
+    2px solid transparent;
+
+
+    cursor:pointer;
+
+
+    transition:.3s;
+
+
+}
+
+
+
+.role svg {
+
+
+    font-size:30px;
+
+
+}
+
+
+
+
+
+.role:hover {
+
+
+    transform:
+
+    translateY(-8px);
+
+
+    background:
+
+    rgba(255,255,255,.35);
+
+
+}
+
+
+
+
+
+.role.active {
+
+
+    border:
+
+    2px solid white;
+
+
+    box-shadow:
+
+    0 0 30px white;
+
+
+}
+
+
+
+
+
+
+
+/* =====================================================
+   BUTTONS
+===================================================== */
+
+
+.primary-btn {
+
+
+    width:100%;
+
+
+    margin-top:25px;
+
+
+    padding:16px;
+
+
+    border:none;
+
+
+    border-radius:18px;
+
+
+    color:white;
+
+
+    font-size:18px;
+
+
+    font-weight:800;
+
+
+    cursor:pointer;
+
+
+    background:
+
+
+    linear-gradient(
+
+        135deg,
+
+        #0077ff,
+
+        #00d4ff
+
+    );
+
+
+    transition:.3s;
+
+
+}
+
+
+
+.primary-btn:hover {
+
+
+    transform:
+
+    translateY(-5px);
+
+
+    box-shadow:
+
+    0 15px 35px
+
+    rgba(0,0,0,.3);
+
+
+}
+
+
+
+
+
+.otp-btn {
+
+
+    background:
+
+    linear-gradient(
+
+        135deg,
+
+        #00b09b,
+
+        #96c93d
+
+    );
+
+
+}
+
+
+
+
+.back-btn {
+
+
+    background:
+
+    linear-gradient(
+
+        135deg,
+
+        #546e7a,
+
+        #263238
+
+    );
+
+
+}
+
+
+
+
+
+/* =====================================================
+   LINKS
+===================================================== */
+
+
+.link {
+
+
+    text-align:center;
+
+
+    margin-top:25px;
+
+
+}
+
+
+
+.link a {
+
+
+    color:white;
+
+
+    text-decoration:none;
+
+
+    font-weight:bold;
+
+
+}
+
+
+
+.link a:hover {
+
+
+    color:#ffe600;
+
+
+}
+/* =====================================================
+   DASHBOARD GLOBAL SUPPORT
+   (Preserves MediStock Admin Dashboard)
+===================================================== */
+
+
+/* MAIN DASHBOARD LAYOUT */
+
+.admin-dashboard {
+
+    min-height:100vh;
+
+    display:flex;
+
+    background:
+
+    linear-gradient(
+        135deg,
+        #eef8ff,
+        #ffffff
+    );
+
+}
+
+
+
+/* =====================================================
+   SIDEBAR
+===================================================== */
+
+
+.sidebar {
+
+
+    width:260px;
+
+
+    min-height:100vh;
+
+
+    padding:30px 20px;
+
+
+    color:white;
+
+
+    background:
+
+
+    linear-gradient(
+
+        180deg,
+
+        #003566,
+
+        #0077b6
+
+    );
+
+
+
+    box-shadow:
+
+    10px 0 30px
+
+    rgba(0,0,0,.15);
+
+
+
+}
+
+
+
+.sidebar h2 {
+
+
+    text-align:center;
+
+
+    font-size:28px;
+
+
+    font-weight:900;
+
+
+    margin-bottom:40px;
+
+
+}
+
+
+
+.sidebar a {
+
+
+    display:block;
+
+
+    padding:15px;
+
+
+    margin:12px 0;
+
+
+    border-radius:15px;
+
+
+    color:white;
+
+
+    text-decoration:none;
+
+
+    transition:.3s;
+
+
+}
+
+
+
+.sidebar a:hover {
+
+
+    background:
+
+    rgba(255,255,255,.25);
+
+
+    transform:
+
+    translateX(10px);
+
+
+}
+
+
+
+
+
+
+/* =====================================================
+   NAVBAR
+===================================================== */
+
+
+.navbar {
+
+
+    background:white;
+
+
+    padding:20px 30px;
+
+
+    border-radius:20px;
+
+
+    display:flex;
+
+
+    justify-content:space-between;
+
+
+    align-items:center;
+
+
+    box-shadow:
+
+
+    0 15px 35px
+
+    rgba(0,0,0,.12);
+
+
+}
+
+
+
+.navbar h1 {
+
+
+    color:#003566;
+
+
+    font-weight:800;
+
+
+}
+
+
+
+
+
+
+
+/* =====================================================
+   DASHBOARD MAIN AREA
+===================================================== */
+
+
+.dashboard-main {
+
+
+    flex:1;
+
+
+    padding:30px;
+
+
+}
+
+
+
+
+
+
+/* =====================================================
+   DASHBOARD CARDS
+===================================================== */
+
+
+.dashboard-grid {
+
+
+    display:grid;
+
+
+    grid-template-columns:
+
+
+    repeat(auto-fit,minmax(230px,1fr));
+
+
+    gap:25px;
+
+
+    margin-top:30px;
+
+
+}
+
+
+
+
+.dashboard-card {
+
+
+    background:white;
+
+
+    padding:30px;
+
+
+    border-radius:25px;
+
+
+    box-shadow:
+
+
+    0 15px 35px
+
+    rgba(0,0,0,.12);
+
+
+
+    transition:.35s;
+
+
+}
+
+
+
+.dashboard-card:hover {
+
+
+    transform:
+
+    translateY(-10px);
+
+
+    box-shadow:
+
+
+    0 25px 50px
+
+    rgba(0,0,0,.18);
+
+
+}
+
+
+
+
+.dashboard-card h2 {
+
+
+    color:#0077b6;
+
+
+    font-size:35px;
+
+
+}
+
+
+
+.dashboard-card p {
+
+
+    color:#555;
+
+
+    font-size:17px;
+
+
+}
+
+
+
+
+
+
+
+/* =====================================================
+   LOW STOCK / EXPIRY ALERT CARDS
+===================================================== */
+
+
+.alert-card {
+
+
+    padding:20px;
+
+
+    border-radius:20px;
+
+
+    background:white;
+
+
+    margin-bottom:20px;
+
+
+    box-shadow:
+
+
+    0 10px 25px
+
+    rgba(0,0,0,.1);
+
+
+}
+
+
+
+.low-stock {
+
+
+    border-left:
+
+    6px solid #ff9800;
+
+
+}
+
+
+
+.expiry-alert {
+
+
+    border-left:
+
+    6px solid #e53935;
+
+
+}
+
+
+
+
+
+
+
+
+/* =====================================================
+   TABLE DESIGN
+===================================================== */
+
+
+.medicine-table-container {
+
+
+    margin-top:30px;
+
+
+    background:white;
+
+
+    padding:25px;
+
+
+    border-radius:25px;
+
+
+    overflow-x:auto;
+
+
+    box-shadow:
+
+
+    0 15px 35px
+
+    rgba(0,0,0,.12);
+
+
+}
+
+
+
+.medicine-table {
+
+
+    width:100%;
+
+
+    border-collapse:collapse;
+
+
+}
+
+
+
+.medicine-table th {
+
+
+    background:
+
+
+    linear-gradient(
+
+    135deg,
+
+    #0077b6,
+
+    #00b4d8
+
+    );
+
+
+    color:white;
+
+
+    padding:16px;
+
+
+    font-size:15px;
+
+
+}
+
+
+
+.medicine-table td {
+
+
+    padding:15px;
+
+
+    text-align:center;
+
+
+    border-bottom:
+
+    1px solid #ddd;
+
+
+}
+
+
+
+.medicine-table tr:hover {
+
+
+    background:#f0fbff;
+
+
+}
+
+
+
+
+
+
+/* =====================================================
+   ACTION BUTTONS
+===================================================== */
+
+
+.delete-btn {
+
+
+    width:auto;
+
+
+    padding:10px 18px;
+
+
+    background:
+
+
+    linear-gradient(
+
+    135deg,
+
+    #ff416c,
+
+    #ff4b2b
+
+    );
+
+
+}
+
+
+
+.edit-btn {
+
+
+    width:auto;
+
+
+    padding:10px 18px;
+
+
+    background:
+
+
+    linear-gradient(
+
+    135deg,
+
+    #11998e,
+
+    #38ef7d
+
+    );
+
+
+}
+
+
+
+
+.logout-btn {
+
+
+    width:auto;
+
+
+    background:
+
+
+    linear-gradient(
+
+    135deg,
+
+    #e53935,
+
+    #b71c1c
+
+    );
+
+
+}
+
+
+
+
+
+
+/* =====================================================
+   SEARCH AND FILTER AREA
+===================================================== */
+
+
+.search-box {
+
+
+    background:white;
+
+
+    padding:20px;
+
+
+    border-radius:20px;
+
+
+    box-shadow:
+
+
+    0 10px 25px
+
+    rgba(0,0,0,.1);
+
+
+    margin-bottom:25px;
+
+
+}
+
+
+
+.search-box input {
+
+
+    background:#f8fcff;
+
+
+}
+
+
+
+
+
+
+
+
+/* =====================================================
+   RESPONSIVE DESIGN
+===================================================== */
+
+
+@media(max-width:1100px){
+
+
+    .auth-container {
+
+
+        flex-direction:column;
+
+
+        gap:30px;
+
+
+        padding:25px;
+
+
+    }
+
+
+
+    .auth-left {
+
+
+        width:100%;
+
+
+        text-align:center;
+
+
+    }
+
+
+
+    .feature-list {
+
+
+        display:none;
+
+
+    }
+
+
+}
+
+
+
+
+
+
+@media(max-width:900px){
+
+
+    .sidebar {
+
+
+        display:none;
+
+
+    }
+
+
+
+    .dashboard-main {
+
+
+        padding:15px;
+
+
+    }
+
+
+
+    .role-box {
+
+
+        grid-template-columns:
+
+        1fr;
+
+
+    }
+
+
+}
+
+
+
+
+
+
+
+@media(max-width:600px){
+
+
+    .auth-card {
+
+
+        width:95%;
+
+
+        padding:30px 20px;
+
+
+        border-radius:25px;
+
+
+    }
+
+
+
+    .brand h1 {
+
+
+        font-size:38px;
+
+
+    }
+
+
+
+    .title {
+
+
+        font-size:26px;
+
+
+    }
+
+
+
+    .medical-icon {
+
+
+        font-size:55px;
+
+
+    }
+
+
+
+    .dashboard-grid {
+
+
+        grid-template-columns:
+
+        1fr;
+
+
+    }
+
+
+
+    .navbar {
+
+
+        padding:15px;
+
+
+        flex-direction:column;
+
+
+        gap:15px;
+
+
+    }
+
+
+
+    .medicine-table {
+
+
+        min-width:700px;
+
+
+    }
+
+
+}
+
+
+
+
+
+
+/* =====================================================
+   SMOOTH SCROLL + ANIMATION
+===================================================== */
+
+
+::-webkit-scrollbar {
+
+
+    width:10px;
+
+
+}
+
+
+
+::-webkit-scrollbar-thumb {
+
+
+    background:
+
+    linear-gradient(
+
+    #0077b6,
+
+    #00b4d8
+
+    );
+
+
+    border-radius:20px;
+
+
+}
+
+
+
+
+
+
+/* =====================================================
+   GLOBAL ANIMATION HELPERS
+===================================================== */
+
+
+.fade-in {
+
+
+    animation:
+
+    fadeIn .7s ease;
+
+
+}
+
+
+
+
+@keyframes fadeIn {
+
+
+from {
+
+
+    opacity:0;
+
+
+    transform:
+
+    translateY(20px);
+
+
+}
+
+
+to {
+
+
+    opacity:1;
+
+
+    transform:
+
+    translateY(0);
+
+
+}
+
+
+}
+/* ===============================
+   REPORT CHARTS
+================================ */
+
+
+.chart-container{
+
+
+background:white;
+
+padding:25px;
+
+border-radius:25px;
+
+box-shadow:
+
+0 15px 35px rgba(0,0,0,.12);
+
+
+}
+
+
+
+.chart-container canvas{
+
+
+max-height:350px;
+
+
+}
+
+.report-download-btn{
+
+    width:220px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:10px;
+
+}
+.danger-badge{
+
+background:#dc2626;
+color:white;
+padding:6px 12px;
+border-radius:20px;
+font-weight:bold;
+
+}
+
+
+.safe-badge{
+
+background:#10b981;
+color:white;
+padding:6px 12px;
+border-radius:20px;
+font-weight:bold;
+
+}

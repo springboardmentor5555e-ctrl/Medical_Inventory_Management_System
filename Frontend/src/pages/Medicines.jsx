@@ -1,236 +1,706 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaArrowLeft, FaEdit, FaTrash } from "react-icons/fa";
+import { FaArrowLeft, FaEdit, FaTrash, FaSave, FaTimes } from "react-icons/fa";
+import BackToDashboard from "../components/BackToDashboard";
+
 import api from "../services/api";
 import "../styles/Medicines.css";
 
-   function Medicines() {
+function Medicines() {
 
     const navigate = useNavigate();
+    // =====================================================
+    // ROLE
+    // =====================================================
 
-    const role = localStorage.getItem("role");
+    const storedRole = localStorage.getItem("role");
+
+    const role = String(storedRole || "")
+        .replace("ROLE_", "")
+        .toUpperCase();
+
+    const isAdmin = role === "ADMIN";
+
+    // =====================================================
+    // STATES
+    // =====================================================
 
     const [medicines, setMedicines] = useState([]);
     const [search, setSearch] = useState("");
     const [category, setCategory] = useState("All");
+
     const [editId, setEditId] = useState(null);
 
-const [editMedicine, setEditMedicine] = useState({});
+    const [editMedicine, setEditMedicine] = useState({});
+
+    // =====================================================
+    // LOAD MEDICINES
+    // =====================================================
 
     useEffect(() => {
         loadMedicines();
     }, []);
 
-   const loadMedicines = async () => {
-    try {
-        const response = await api.get("/medicines");
+    const loadMedicines = async () => {
 
-        console.log("Medicines received:", response.data);
+        try {
 
-        setMedicines(response.data);
+            const response =
+                await api.get("/medicines");
 
-    } catch (error) {
-        console.log("Error:", error);
-    }
-};
-const filteredMedicines = medicines.filter((medicine) => {
+            console.log(
+                "Medicines received:",
+                response.data
+            );
 
-    const matchSearch =
-        medicine.name.toLowerCase().includes(search.toLowerCase());
+            setMedicines(response.data);
 
-    const matchCategory =
-        category === "All" || medicine.category === category;
+        } catch (error) {
 
-    return matchSearch && matchCategory;
+            console.error(
+                "Error loading medicines:",
+                error
+            );
 
-});
-    const deleteMedicine = async (id) => {
-        if (window.confirm("Delete this medicine?")) {
-            await api.delete(`/medicines/${id}`);
-            loadMedicines();
+            if (error.response?.status === 401) {
+                alert("Please login again.");
+            }
+
+            if (error.response?.status === 403) {
+                alert("You are not authorized to view medicines.");
+            }
         }
     };
+
+    // =====================================================
+    // SEARCH + CATEGORY FILTER
+    // =====================================================
+
+    const filteredMedicines =
+        medicines.filter((medicine) => {
+
+            const medicineName =
+                String(medicine.name || "");
+
+            const medicineCategory =
+                String(medicine.category || "");
+
+            const matchSearch =
+                medicineName
+                    .toLowerCase()
+                    .includes(
+                        search.toLowerCase()
+                    );
+
+            const matchCategory =
+                category === "All" ||
+                medicineCategory === category;
+
+            return (
+                matchSearch &&
+                matchCategory
+            );
+        });
+
+    // =====================================================
+    // START EDIT
+    // =====================================================
+
     const startEdit = (medicine) => {
 
-    setEditId(medicine.id);
-    setEditMedicine({...medicine});
+        setEditId(medicine.id);
 
-};
+        setEditMedicine({
+            ...medicine
+        });
+    };
 
+    // =====================================================
+    // CANCEL EDIT
+    // =====================================================
 
-const handleEditChange = (e) => {
-
-    setEditMedicine({
-        ...editMedicine,
-        [e.target.name]: e.target.value
-    });
-
-};
-
-
-const updateMedicine = async () => {
-
-    try {
-
-        await api.put(
-            `/medicines/${editId}`,
-            editMedicine
-        );
+    const cancelEdit = () => {
 
         setEditId(null);
-        loadMedicines();
 
-    } catch(error) {
-        console.log("Role:", role);
+        setEditMedicine({});
+    };
 
-    }
+    // =====================================================
+    // HANDLE EDIT
+    // =====================================================
 
-};
+    const handleEditChange = (e) => {
+
+        const { name, value } = e.target;
+
+        setEditMedicine({
+            ...editMedicine,
+            [name]: value
+        });
+    };
+
+    // =====================================================
+    // UPDATE MEDICINE
+    // =====================================================
+
+    const updateMedicine = async () => {
+
+        try {
+
+            await api.put(
+                `/medicines/${editId}`,
+                editMedicine
+            );
+
+            alert(
+                "Medicine updated successfully!"
+            );
+
+            setEditId(null);
+
+            setEditMedicine({});
+
+            await loadMedicines();
+
+        } catch (error) {
+
+            console.error(
+                "Update medicine error:",
+                error
+            );
+
+            console.error(
+                "Response:",
+                error.response?.data
+            );
+
+            if (error.response?.status === 403) {
+
+                alert(
+                    "You are not authorized to edit medicines."
+                );
+
+            } else {
+
+                alert(
+                    error.response?.data?.message ||
+                    "Failed to update medicine."
+                );
+            }
+        }
+    };
+
+    // =====================================================
+    // DELETE MEDICINE
+    // =====================================================
+
+    const deleteMedicine = async (id) => {
+
+        const confirmed =
+            window.confirm(
+                "Are you sure you want to delete this medicine?"
+            );
+
+        if (!confirmed) {
+            return;
+        }
+
+        try {
+
+            await api.delete(
+                `/medicines/${id}`
+            );
+
+            alert(
+                "Medicine deleted successfully!"
+            );
+
+            await loadMedicines();
+
+        } catch (error) {
+
+            console.error(
+                "Delete medicine error:",
+                error
+            );
+
+            console.error(
+                "Response:",
+                error.response?.data
+            );
+
+            if (error.response?.status === 403) {
+
+                alert(
+                    "You are not authorized to delete medicines."
+                );
+
+            } else {
+
+                alert(
+                    error.response?.data?.message ||
+                    "Failed to delete medicine."
+                );
+            }
+        }
+    };
+
+    // =====================================================
+    // RENDER
+    // =====================================================
 
     return (
+
         <div className="medicine-page">
+
             <div className="medicine-card">
+
+                {/* ================================================= */}
+                {/* HEADER */}
+                {/* ================================================= */}
+
                 <div className="medicine-header">
-<div className="page-title">
 
-<button
-    className="back-btn"
-    onClick={() => navigate(-1)}
->
-    <FaArrowLeft />
-</button>
-  <h2 className="page-title">Medicines</h2>
-    <div className="filters">
+                    <div className="page-title">
 
-    </div>
-</div>
+                        <BackToDashboard />
 
-<h2>💊 Medicines</h2>
-</div>
+                        <h2>
+                            💊 Medicines
+                        </h2>
 
-<div className="filters">
+                    </div>
 
-    <div className="filters">
+                </div>
 
-        <input
-            type="text"
-            placeholder="🔍 Search Medicine..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="search-box"
-        />
+                {/* ================================================= */}
+                {/* FILTERS */}
+                {/* ================================================= */}
 
-        <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="category-filter"
-        >
+                <div className="filters">
 
-            <option value="All">All Categories</option>
+                    <input
+                        type="text"
+                        placeholder="🔍 Search Medicine..."
+                        value={search}
+                        onChange={(e) =>
+                            setSearch(
+                                e.target.value
+                            )
+                        }
+                        className="search-box"
+                    />
 
-            <option value="Tablet">Tablet</option>
+                    <select
+                        value={category}
+                        onChange={(e) =>
+                            setCategory(
+                                e.target.value
+                            )
+                        }
+                        className="category-filter"
+                    >
 
-            <option value="Capsule">Capsule</option>
+                        <option value="All">
+                            All Categories
+                        </option>
 
-            <option value="Syrup">Syrup</option>
+                        <option value="Tablet">
+                            Tablet
+                        </option>
 
-            <option value="Injection">Injection</option>
+                        <option value="Capsule">
+                            Capsule
+                        </option>
 
-            <option value="Cream">Cream</option>
+                        <option value="Syrup">
+                            Syrup
+                        </option>
 
-            <option value="Drops">Drops</option>
+                        <option value="Injection">
+                            Injection
+                        </option>
 
-            <option value="Other">Other</option>
+                        <option value="Cream">
+                            Cream
+                        </option>
 
-        </select>
+                        <option value="Drops">
+                            Drops
+                        </option>
 
-    </div>
+                        <option value="Other">
+                            Other
+                        </option>
 
-</div>
+                    </select>
+
+                </div>
+
+                {/* ================================================= */}
+                {/* TABLE */}
+                {/* ================================================= */}
+
                 <table>
 
                     <thead>
 
                         <tr>
+
                             <th>Name</th>
+
                             <th>Batch</th>
+
                             <th>Category</th>
+
                             <th>Supplier</th>
+
                             <th>Quantity</th>
+
                             <th>Price</th>
+
                             <th>Expiry</th>
-                            {role === "admin" && <th>Actions</th>}
+
+                            {isAdmin && (
+                                <th>Actions</th>
+                            )}
+
                         </tr>
 
                     </thead>
 
                     <tbody>
-                        {filteredMedicines.map((medicine) => (
 
-                           <tr key={medicine.id}>
+                        {filteredMedicines.map(
+                            (medicine) => (
 
-    <td>
-        {editId === medicine.id ? (
-            <input
-                type="text"
-                name="name"
-                value={editMedicine.name}
-                onChange={handleEditChange}
-            />
-        ) : (
-            medicine.name
-        )}
-    </td>
+                                <tr
+                                    key={
+                                        medicine.id
+                                    }
+                                >
 
-    <td>{medicine.batchNumber}</td>
+                                    {/* ================= NAME ================= */}
 
-    <td>{medicine.category}</td>
+                                    <td>
 
-    <td>{medicine.supplier}</td>
+                                        {editId ===
+                                        medicine.id ? (
 
-    <td>{medicine.quantity}</td>
+                                            <input
+                                                type="text"
+                                                name="name"
+                                                value={
+                                                    editMedicine.name ||
+                                                    ""
+                                                }
+                                                onChange={
+                                                    handleEditChange
+                                                }
+                                            />
 
-    <td>₹{medicine.price}</td>
+                                        ) : (
 
-    <td>{medicine.expiryDate}</td>
-    {role === "admin" && (
-    <td>
-        {editId === medicine.id ? (
-            <button
-                className="save-btn"
-                onClick={updateMedicine}
-            >
-                Save
-            </button>
-        ) : (
-            <>
-                <button
-                    className="edit-btn"
-                    onClick={() => startEdit(medicine)}
-                >
-                    <FaEdit />
-                </button>
+                                            medicine.name
 
-                <button
-                    className="delete-btn"
-                    onClick={() => deleteMedicine(medicine.id)}
-                >
-                    <FaTrash />
-                </button>
-            </>
-        )}
-    </td>
-)}
+                                        )}
 
-</tr>
-                        ))}
+                                    </td>
+
+                                    {/* ================= BATCH ================= */}
+
+                                    <td>
+
+                                        {editId ===
+                                        medicine.id ? (
+
+                                            <input
+                                                type="text"
+                                                name="batchNumber"
+                                                value={
+                                                    editMedicine.batchNumber ||
+                                                    ""
+                                                }
+                                                onChange={
+                                                    handleEditChange
+                                                }
+                                            />
+
+                                        ) : (
+
+                                            medicine.batchNumber
+
+                                        )}
+
+                                    </td>
+
+                                    {/* ================= CATEGORY ================= */}
+
+                                    <td>
+
+                                        {editId ===
+                                        medicine.id ? (
+
+                                            <select
+                                                name="category"
+                                                value={
+                                                    editMedicine.category ||
+                                                    ""
+                                                }
+                                                onChange={
+                                                    handleEditChange
+                                                }
+                                            >
+
+                                                <option value="">
+                                                    Select
+                                                </option>
+
+                                                <option value="Tablet">
+                                                    Tablet
+                                                </option>
+
+                                                <option value="Capsule">
+                                                    Capsule
+                                                </option>
+
+                                                <option value="Syrup">
+                                                    Syrup
+                                                </option>
+
+                                                <option value="Injection">
+                                                    Injection
+                                                </option>
+
+                                                <option value="Cream">
+                                                    Cream
+                                                </option>
+
+                                                <option value="Drops">
+                                                    Drops
+                                                </option>
+
+                                                <option value="Other">
+                                                    Other
+                                                </option>
+
+                                            </select>
+
+                                        ) : (
+
+                                            medicine.category
+
+                                        )}
+
+                                    </td>
+
+                                    {/* ================= SUPPLIER ================= */}
+
+                                    <td>
+
+                                        {editId ===
+                                        medicine.id ? (
+
+                                            <input
+                                                type="text"
+                                                name="supplier"
+                                                value={
+                                                    editMedicine.supplier ||
+                                                    ""
+                                                }
+                                                onChange={
+                                                    handleEditChange
+                                                }
+                                            />
+
+                                        ) : (
+
+                                            medicine.supplier
+
+                                        )}
+
+                                    </td>
+
+                                    {/* ================= QUANTITY ================= */}
+
+                                    <td>
+
+                                        {editId ===
+                                        medicine.id ? (
+
+                                            <input
+                                                type="number"
+                                                name="quantity"
+                                                value={
+                                                    editMedicine.quantity ??
+                                                    ""
+                                                }
+                                                onChange={
+                                                    handleEditChange
+                                                }
+                                            />
+
+                                        ) : (
+
+                                            medicine.quantity
+
+                                        )}
+
+                                    </td>
+
+                                    {/* ================= PRICE ================= */}
+
+                                    <td>
+
+                                        {editId ===
+                                        medicine.id ? (
+
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                name="price"
+                                                value={
+                                                    editMedicine.price ??
+                                                    ""
+                                                }
+                                                onChange={
+                                                    handleEditChange
+                                                }
+                                            />
+
+                                        ) : (
+
+                                            `₹${medicine.price}`
+
+                                        )}
+
+                                    </td>
+
+                                    {/* ================= EXPIRY ================= */}
+
+                                    <td>
+
+                                        {editId ===
+                                        medicine.id ? (
+
+                                            <input
+                                                type="date"
+                                                name="expiryDate"
+                                                value={
+                                                    editMedicine.expiryDate ||
+                                                    ""
+                                                }
+                                                onChange={
+                                                    handleEditChange
+                                                }
+                                            />
+
+                                        ) : (
+
+                                            medicine.expiryDate
+
+                                        )}
+
+                                    </td>
+
+                                    {/* ================= ACTIONS ================= */}
+
+                                    {isAdmin && (
+
+                                        <td>
+
+                                            {editId ===
+                                            medicine.id ? (
+
+                                                <>
+
+                                                    <button
+                                                        className="save-btn"
+                                                        onClick={
+                                                            updateMedicine
+                                                        }
+                                                        title="Save"
+                                                    >
+                                                        <FaSave />
+                                                        Save
+                                                    </button>
+
+                                                    <button
+                                                        className="cancel-btn"
+                                                        onClick={
+                                                            cancelEdit
+                                                        }
+                                                        title="Cancel"
+                                                    >
+                                                        <FaTimes />
+                                                        Cancel
+                                                    </button>
+
+                                                </>
+
+                                            ) : (
+
+                                                <>
+
+                                                    <button
+                                                        className="edit-btn"
+                                                        onClick={() =>
+                                                            startEdit(
+                                                                medicine
+                                                            )
+                                                        }
+                                                        title="Edit Medicine"
+                                                    >
+                                                        <FaEdit />
+                                                        Edit
+                                                    </button>
+
+                                                    <button
+                                                        className="delete-btn"
+                                                        onClick={() =>
+                                                            deleteMedicine(
+                                                                medicine.id
+                                                            )
+                                                        }
+                                                        title="Delete Medicine"
+                                                    >
+                                                        <FaTrash />
+                                                        Delete
+                                                    </button>
+
+                                                </>
+
+                                            )}
+
+                                        </td>
+
+                                    )}
+
+                                </tr>
+
+                            )
+                        )}
 
                     </tbody>
 
                 </table>
 
+                {/* ================================================= */}
+                {/* NO RESULTS */}
+                {/* ================================================= */}
+
+                {filteredMedicines.length === 0 && (
+
+                    <p className="no-medicines">
+                        No medicines found.
+                    </p>
+
+                )}
+
             </div>
-            </div>
+
+        </div>
     );
 }
 

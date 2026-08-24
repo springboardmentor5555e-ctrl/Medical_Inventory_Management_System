@@ -5,6 +5,7 @@ import com.medistock.demo.entity.Notification;
 import com.medistock.demo.repository.NotificationRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
 
@@ -13,17 +14,21 @@ import java.util.List;
 public class NotificationService {
 
 
-    private final NotificationRepository repository;
+private final NotificationRepository repository;
+
+private final EmailService emailService;
+
+@Value("${spring.mail.username}")
+private String notificationEmail;
 
 
-    public NotificationService(
-            NotificationRepository repository
-    ){
-
-        this.repository = repository;
-
-    }
-
+ public NotificationService(
+        NotificationRepository repository,
+        EmailService emailService
+) {
+    this.repository = repository;
+    this.emailService = emailService;
+}
 
     // =====================================
     // CREATE GENERAL NOTIFICATION
@@ -109,14 +114,12 @@ public class NotificationService {
 
 
         Notification saved =
-                repository.save(notification);
+        repository.save(notification);
 
-
-        System.out.println(
-                "Notification saved ID : "
-                + saved.getId()
-        );
-
+System.out.println(
+        "Notification saved ID : "
+        + saved.getId()
+);
 
         return saved;
 
@@ -127,30 +130,35 @@ public class NotificationService {
     // MEDICINE ADDED
     // =====================================
 
-    public Notification medicineAdded(
+  // =====================================
+// MEDICINE ADDED
+// =====================================
 
-            String medicineName,
+public Notification medicineAdded(
+        Medicine medicine
+) {
 
-            int quantity
+    Notification notification =
+            createNotification(
 
-    ){
+                    "Medicine Added",
 
-        return createNotification(
+                    medicine.getName()
+                            + " added successfully. Quantity : "
+                            + medicine.getQuantity(),
 
-                "Medicine Added",
+                    "SYSTEM",
 
-                medicineName
-                        + " added successfully. Quantity : "
-                        + quantity,
+                    "ADMIN"
+            );
 
-                "SYSTEM",
+    emailService.sendMedicineAddedEmail(
+            notificationEmail,
+            medicine
+    );
 
-                "ADMIN"
-
-        );
-
-    }
-
+    return notification;
+}
 
     // =====================================
     // MEDICINE UPDATED

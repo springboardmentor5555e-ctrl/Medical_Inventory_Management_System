@@ -77,6 +77,7 @@ function PharmacistAddMedicine() {
                                 onChange={handleChange}
                                 required
                             />
+                            
                         </div>
 
                         <div className="form-group">

@@ -18,20 +18,15 @@ import java.util.List;
 public class SalePdfService {
 
     private final SaleRepository saleRepository;
-
     private final NotificationService notificationService;
-
 
     public SalePdfService(
             SaleRepository saleRepository,
             NotificationService notificationService
     ) {
-
         this.saleRepository = saleRepository;
-
         this.notificationService = notificationService;
     }
-
 
     // =========================================================
     // GENERATE SALES PDF FOR LOGGED-IN USER
@@ -41,30 +36,20 @@ public class SalePdfService {
 
         try {
 
-            // -------------------------------------------------
-            // GET ONLY SALES MADE BY THIS USER
-            // -------------------------------------------------
-
             List<Sale> sales =
                     saleRepository.findBySoldById(userId);
-
 
             ByteArrayOutputStream outputStream =
                     new ByteArrayOutputStream();
 
-
-            Document document =
-                    new Document();
-
+            Document document = new Document();
 
             PdfWriter.getInstance(
                     document,
                     outputStream
             );
 
-
             document.open();
-
 
             // =================================================
             // TITLE
@@ -76,7 +61,6 @@ public class SalePdfService {
                             20
                     );
 
-
             document.add(
                     new Paragraph(
                             "MediStock Sales History",
@@ -84,11 +68,7 @@ public class SalePdfService {
                     )
             );
 
-
-            document.add(
-                    new Paragraph(" ")
-            );
-
+            document.add(new Paragraph(" "));
 
             // =================================================
             // USER INFORMATION
@@ -96,16 +76,11 @@ public class SalePdfService {
 
             document.add(
                     new Paragraph(
-                            "Pharmacist/User ID : "
-                                    + userId
+                            "Pharmacist/User ID : " + userId
                     )
             );
 
-
-            document.add(
-                    new Paragraph(" ")
-            );
-
+            document.add(new Paragraph(" "));
 
             // =================================================
             // SALES DATA
@@ -123,13 +98,9 @@ public class SalePdfService {
 
                 for (Sale sale : sales) {
 
-
                     String medicineName = "N/A";
-
                     String batchNumber = "N/A";
-
                     String soldBy = "N/A";
-
 
                     if (sale.getMedicine() != null) {
 
@@ -140,13 +111,11 @@ public class SalePdfService {
                                 sale.getMedicine().getBatchNumber();
                     }
 
-
                     if (sale.getSoldBy() != null) {
 
                         soldBy =
-                                sale.getSoldBy().getUsername();
+                                sale.getSoldBy().getEmail();
                     }
-
 
                     document.add(
                             new Paragraph(
@@ -171,22 +140,13 @@ public class SalePdfService {
                                             + "\n\n----------------------------\n"
                             )
                     );
-
                 }
-
             }
-
-
-            // =================================================
-            // CLOSE DOCUMENT
-            // =================================================
 
             document.close();
 
-
             byte[] pdf =
                     outputStream.toByteArray();
-
 
             // =================================================
             // NOTIFICATION
@@ -198,15 +158,11 @@ public class SalePdfService {
 
             } catch (Exception notificationError) {
 
-                // Notification failure should NOT stop PDF download
-
                 notificationError.printStackTrace();
 
             }
 
-
             return pdf;
-
 
         } catch (Exception e) {
 
@@ -217,14 +173,11 @@ public class SalePdfService {
                             + e.getMessage(),
                     e
             );
-
         }
-
     }
 
-
     // =========================================================
-    // OPTIONAL: GENERATE PDF FOR ALL SALES
+    // GENERATE PDF FOR ALL SALES
     // =========================================================
 
     public byte[] generateAllSalesPdf() {
@@ -234,30 +187,24 @@ public class SalePdfService {
             List<Sale> sales =
                     saleRepository.findAll();
 
-
             ByteArrayOutputStream outputStream =
                     new ByteArrayOutputStream();
 
-
             Document document =
                     new Document();
-
 
             PdfWriter.getInstance(
                     document,
                     outputStream
             );
 
-
             document.open();
-
 
             Font titleFont =
                     FontFactory.getFont(
                             FontFactory.HELVETICA_BOLD,
                             20
                     );
-
 
             document.add(
                     new Paragraph(
@@ -266,11 +213,7 @@ public class SalePdfService {
                     )
             );
 
-
-            document.add(
-                    new Paragraph(" ")
-            );
-
+            document.add(new Paragraph(" "));
 
             if (sales == null || sales.isEmpty()) {
 
@@ -285,11 +228,8 @@ public class SalePdfService {
                 for (Sale sale : sales) {
 
                     String medicineName = "N/A";
-
                     String batchNumber = "N/A";
-
                     String soldBy = "N/A";
-
 
                     if (sale.getMedicine() != null) {
 
@@ -298,17 +238,13 @@ public class SalePdfService {
 
                         batchNumber =
                                 sale.getMedicine().getBatchNumber();
-
                     }
-
 
                     if (sale.getSoldBy() != null) {
 
                         soldBy =
-                                sale.getSoldBy().getUsername();
-
+                                sale.getSoldBy().getEmail();
                     }
-
 
                     document.add(
                             new Paragraph(
@@ -332,20 +268,14 @@ public class SalePdfService {
                                             + sale.getSaleDate()
 
                                             + "\n\n----------------------------\n"
-
                             )
                     );
-
                 }
-
             }
-
 
             document.close();
 
-
             return outputStream.toByteArray();
-
 
         } catch (Exception e) {
 
@@ -355,9 +285,6 @@ public class SalePdfService {
                     "All sales PDF generation failed",
                     e
             );
-
         }
-
     }
-
 }

@@ -1,0 +1,590 @@
+/* =========================================================
+   MEDISTOCK ANALYTICS
+   BLUE PROFESSIONAL THEME
+   Matches Admin Dashboard
+========================================================= */
+
+.analytics-page {
+    min-height: 100vh;
+    padding: 32px;
+    box-sizing: border-box;
+
+    background: #EEF4FC;
+
+    color: #26384D;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.analytics-header {
+    margin-bottom: 28px;
+}
+
+.analytics-header h1 {
+    margin: 0;
+
+    font-size: 32px;
+    font-weight: 700;
+
+    color: #174A8B;
+}
+
+.analytics-header p {
+    margin: 8px 0 0;
+
+    font-size: 16px;
+
+    color: #65758B;
+}
+
+
+/* =========================================================
+   SUMMARY CARDS
+========================================================= */
+
+.analytics-summary {
+    display: grid;
+
+    grid-template-columns: repeat(4, 1fr);
+
+    gap: 22px;
+
+    margin-bottom: 30px;
+}
+
+.summary-card {
+    min-height: 110px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background: #FFFFFF;
+
+    border: 1px solid #C7D8ED;
+
+    border-radius: 18px;
+
+    box-shadow:
+        0 8px 24px rgba(23, 74, 139, 0.10);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.summary-card:hover {
+    transform: translateY(-3px);
+
+    box-shadow:
+        0 12px 30px rgba(23, 74, 139, 0.16);
+}
+
+.summary-card h3 {
+    margin: 0;
+
+    font-size: 15px;
+
+    font-weight: 600;
+
+    color: #65758B;
+}
+
+.summary-card strong {
+    display: block;
+
+    margin-top: 10px;
+
+    font-size: 34px;
+
+    font-weight: 700;
+
+    color: #246BCE;
+}
+
+
+/* =========================================================
+   CHART GRID
+========================================================= */
+
+.charts-grid {
+    display: grid;
+
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 26px;
+}
+
+
+/* =========================================================
+   CHART CARD
+========================================================= */
+
+.chart-card {
+    min-height: 390px;
+
+    padding: 22px;
+
+    box-sizing: border-box;
+
+    background: #FFFFFF;
+
+    border: 1px solid #C7D8ED;
+
+    border-radius: 20px;
+
+    box-shadow:
+        0 8px 24px rgba(23, 74, 139, 0.10);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.chart-card:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 12px 30px rgba(23, 74, 139, 0.15);
+}
+
+.chart-card h2 {
+    margin: 0 0 15px;
+
+    font-size: 20px;
+
+    font-weight: 700;
+
+    color: #174A8B;
+}
+
+
+/* =========================================================
+   CHART CONTAINER
+========================================================= */
+
+.chart-container {
+    width: 100%;
+
+    height: 320px;
+}
+
+
+/* =========================================================
+   TRACKING CARD
+========================================================= */
+
+.tracking-card {
+    margin-top: 30px;
+
+    padding: 28px;
+
+    background: #FFFFFF;
+
+    border: 1px solid #C7D8ED;
+
+    border-radius: 20px;
+
+    box-shadow:
+        0 8px 24px rgba(23, 74, 139, 0.10);
+}
+
+.tracking-card h2 {
+    margin: 0;
+
+    font-size: 21px;
+
+    color: #174A8B;
+}
+
+
+/* =========================================================
+   TRACKING FLOW
+========================================================= */
+
+.tracking-flow {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 14px;
+
+    flex-wrap: wrap;
+
+    margin-top: 28px;
+}
+
+
+/* =========================================================
+   FLOW BOX
+========================================================= */
+
+.flow-box {
+    width: 160px;
+
+    min-height: 145px;
+
+    padding: 18px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    text-align: center;
+
+    box-sizing: border-box;
+
+    background: #E6F0FC;
+
+    border: 1px solid #8EB2DA;
+
+    border-radius: 17px;
+
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease;
+}
+
+.flow-box:hover {
+    transform: translateY(-4px);
+
+    background: #D7E8FA;
+}
+
+
+/* =========================================================
+   FLOW NUMBER
+========================================================= */
+
+.flow-box span {
+    width: 36px;
+    height: 36px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #174A8B;
+
+    color: #FFFFFF;
+
+    font-size: 15px;
+
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   FLOW TITLE
+========================================================= */
+
+.flow-box h3 {
+    margin: 12px 0 7px;
+
+    font-size: 15px;
+
+    font-weight: 700;
+
+    color: #174A8B;
+}
+
+
+/* =========================================================
+   FLOW DESCRIPTION
+========================================================= */
+
+.flow-box p {
+    margin: 0;
+
+    font-size: 12px;
+
+    line-height: 1.5;
+
+    color: #65758B;
+}
+
+
+/* =========================================================
+   FLOW ARROW
+========================================================= */
+
+.flow-arrow {
+    font-size: 28px;
+
+    font-weight: 700;
+
+    color: #246BCE;
+}
+
+
+/* =========================================================
+   RECHARTS TOOLTIP
+========================================================= */
+
+.recharts-tooltip-wrapper {
+    outline: none;
+}
+
+.recharts-default-tooltip {
+    background: #FFFFFF !important;
+
+    border: 1px solid #8EB2DA !important;
+
+    border-radius: 10px !important;
+
+    box-shadow:
+        0 5px 15px rgba(23, 74, 139, 0.15);
+}
+
+
+/* =========================================================
+   LEGEND
+========================================================= */
+
+.recharts-legend-item-text {
+    color: #526579 !important;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1100px) {
+
+    .analytics-summary {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+@media (max-width: 700px) {
+
+    .analytics-page {
+        padding: 18px;
+    }
+
+    .analytics-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .chart-card {
+        min-height: 350px;
+    }
+
+    .chart-container {
+        height: 280px;
+    }
+
+    .flow-arrow {
+        transform: rotate(90deg);
+    }
+}
+/* =====================================================
+   ANALYTICS HEADER
+   ===================================================== */
+
+.analytics-header {
+    position: relative;
+    padding: 10px 5px 30px 5px;
+    margin-bottom: 5px;
+}
+
+
+/* =====================================================
+   BACK TO DASHBOARD BUTTON
+   ===================================================== */
+
+.analytics-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+
+    background: #174A8B;
+    color: white;
+
+    border: none;
+    border-radius: 9px;
+
+    padding: 10px 17px;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    margin-bottom: 22px;
+
+    box-shadow: 0 4px 10px rgba(23, 74, 139, 0.18);
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.analytics-back-btn:hover {
+    background: #123D73;
+
+    transform: translateX(-3px);
+
+    box-shadow:
+        0 6px 14px rgba(23, 74, 139, 0.25);
+}
+
+
+.analytics-back-btn svg {
+    font-size: 14px;
+}
+
+
+/* =====================================================
+   TITLE AREA
+   ===================================================== */
+
+.analytics-title-section {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+
+    padding: 22px 25px;
+
+    border-radius: 16px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #174A8B 0%,
+            #246BCE 55%,
+            #3B82C4 100%
+        );
+
+    color: white;
+
+    box-shadow:
+        0 8px 22px rgba(23, 74, 139, 0.18);
+}
+
+
+/* =====================================================
+   TITLE ICON
+   ===================================================== */
+
+.analytics-title-icon {
+    width: 58px;
+    height: 58px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 14px;
+
+    background: rgba(255, 255, 255, 0.16);
+
+    border: 1px solid rgba(255, 255, 255, 0.25);
+
+    flex-shrink: 0;
+}
+
+
+.analytics-title-icon svg {
+    font-size: 27px;
+}
+
+
+/* =====================================================
+   MAIN TITLE
+   ===================================================== */
+
+.analytics-title-section h1 {
+    margin: 0;
+
+    font-size: 30px;
+    font-weight: 700;
+
+    letter-spacing: 0.2px;
+
+    color: #ffffff;
+}
+
+/* =====================================================
+   SUBTITLE
+   ===================================================== */
+
+.analytics-title-section p {
+    margin: 6px 0 0;
+
+    color: rgba(255, 255, 255, 0.88);
+
+    font-size: 15px;
+}
+
+
+/* =====================================================
+   RESPONSIVE
+   ===================================================== */
+
+@media (max-width: 700px) {
+
+    .analytics-title-section {
+        padding: 18px;
+
+        gap: 13px;
+    }
+
+
+    .analytics-title-icon {
+        width: 48px;
+        height: 48px;
+    }
+
+
+    .analytics-title-section h1 {
+        font-size: 23px;
+    }
+
+
+    .analytics-title-section p {
+        font-size: 13px;
+    }
+
+
+    .analytics-back-btn span {
+        display: none;
+    }
+
+}
+.analytics-title-section p {
+    margin: 6px 0 0;
+
+    color: rgba(255, 255, 255, 0.92);
+
+    font-size: 15px;
+}

@@ -1,135 +1,362 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { FaArrowLeft, FaTrash, FaEdit } from "react-icons/fa";
 import api from "../services/api";
-import "../styles/Suppliers.css";
-
+import "../styles/dashboard.css";
 
 function Suppliers() {
 
-  const navigate = useNavigate();
+    const [suppliers, setSuppliers] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-  const [suppliers, setSuppliers] = useState([]);
+    const [editingId, setEditingId] = useState(null);
 
+    const [editData, setEditData] = useState({
+        name: "",
+        contact: "",
+        email: "",
+        address: ""
+    });
 
-  useEffect(() => {
+    useEffect(() => {
+        loadSuppliers();
+    }, []);
 
-    loadSuppliers();
+    // ============================
+    // LOAD SUPPLIERS
+    // ============================
 
-  }, []);
+    const loadSuppliers = async () => {
 
+        try {
 
+            const response = await api.get("/suppliers");
 
-  const loadSuppliers = async () => {
+            console.log("SUPPLIERS DATA:", response.data);
 
-    try {
+            setSuppliers(response.data);
 
-      const response = await api.get("/suppliers");
+        } catch (error) {
 
-      setSuppliers(response.data);
+            console.error("Error loading suppliers:", error);
 
-    } catch(error) {
+        } finally {
 
-      console.log(error);
+            setLoading(false);
 
-    }
-
-  };
-
-
-
-  const deleteSupplier = async (id) => {
-
-    if(window.confirm("Delete this supplier?")) {
-
-      await api.delete(`/suppliers/${id}`);
-
-      loadSuppliers();
-
-    }
-
-  };
+        }
+    };
 
 
+    // ============================
+    // DELETE SUPPLIER
+    // ============================
 
-  return (
+    const deleteSupplier = async (id) => {
 
-    <div className="suppliers-container">
+        const confirmDelete = window.confirm(
+            "Are you sure you want to delete this supplier?"
+        );
 
+        if (!confirmDelete) return;
 
-      <FaArrowLeft
-        className="back-btn"
-        onClick={() => navigate("/admin-dashboard")}
-      />
+        try {
 
+            await api.delete(`/suppliers/${id}`);
 
-      <h2>🏢 Suppliers List</h2>
+            alert("Supplier deleted successfully!");
 
+            loadSuppliers();
 
-      <table>
+} catch (error) {
 
-        <thead>
+    console.error("DELETE ERROR:", error);
 
-          <tr>
-            <th>Supplier Name</th>
-            <th>Company Name</th>
-            <th>Phone Number</th>
-            <th>Action</th>
-          </tr>
+    console.error("STATUS:", error.response?.status);
 
-        </thead>
+    console.error("DATA:", error.response?.data);
 
-
-        <tbody>
-
-
-          {suppliers.map((supplier) => (
-
-            <tr key={supplier.id}>
-
-
-              <td>
-                {supplier.supplierName}
-              </td>
+    alert(
+        "Delete failed: " +
+        (
+            error.response?.data?.message ||
+            error.response?.data ||
+            "Backend error"
+        )
+    );
+}
+    };
 
 
-              <td>
-                {supplier.companyName}
-              </td>
-              <td>{supplier.phone}</td>
-              <td>
-    <button
-        className="edit-btn"
-        onClick={() => navigate(`/edit-supplier/${supplier.id}`)}
-    >
-        <FaEdit />
-    </button>
+    // ============================
+    // START EDIT
+    // ============================
 
-    <button
-        className="delete-btn"
-        onClick={() => deleteSupplier(supplier.id)}
-    >
-        <FaTrash />
-    </button>
+    const startEdit = (supplier) => {
 
-</td>
+        setEditingId(supplier.id);
 
-            </tr>
+        setEditData({
+            name: supplier.name || "",
+            contact: supplier.contact || "",
+            email: supplier.email || "",
+            address: supplier.address || ""
+        });
 
-          ))}
+    };
 
 
-        </tbody>
+    // ============================
+    // HANDLE EDIT INPUT
+    // ============================
+
+    const handleEditChange = (e) => {
+
+        setEditData({
+            ...editData,
+            [e.target.name]: e.target.value
+        });
+
+    };
 
 
-      </table>
+    // ============================
+    // SAVE EDIT
+    // ============================
+
+    const saveEdit = async (id) => {
+
+        try {
+
+            await api.put(`/suppliers/${id}`, editData);
+
+            alert("Supplier updated successfully! ✅");
+
+            setEditingId(null);
+
+            loadSuppliers();
+
+        } catch (error) {
+
+            console.error("Error updating supplier:", error);
+
+            alert("Failed to update supplier.");
+
+        }
+    };
 
 
-    </div>
+    // ============================
+    // CANCEL EDIT
+    // ============================
 
-  );
+    const cancelEdit = () => {
+
+        setEditingId(null);
+
+    };
+
+
+    return (
+
+        <div className="dashboard">
+
+            <div className="main">
+
+                {/* Supplier List Header */}
+
+                <div className="welcome">
+
+                    <h2>Supplier List</h2>
+
+                    <p>
+                        Manage your medicine suppliers
+                    </p>
+
+                </div>
+
+
+                {/* Supplier Data */}
+
+                {loading ? (
+
+                    <h3>Loading suppliers...</h3>
+
+                ) : suppliers.length === 0 ? (
+
+                    <h3>No suppliers found.</h3>
+
+                ) : (
+
+                    <div className="suppliers-table-container">
+
+                        <table className="suppliers-table">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>ID</th>
+
+                                    <th>Supplier Name</th>
+
+                                    <th>Contact</th>
+
+                                    <th>Email</th>
+
+                                    <th>Address</th>
+
+                                    <th>Actions</th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody>
+
+                                {suppliers.map((supplier) => (
+
+                                    <tr key={supplier.id}>
+
+                                        <td>
+                                            {supplier.id}
+                                        </td>
+
+
+                                        {editingId === supplier.id ? (
+
+                                            <>
+
+                                                <td>
+                                                    <input
+                                                        type="text"
+                                                        name="name"
+                                                        value={editData.name}
+                                                        onChange={handleEditChange}
+                                                    />
+                                                </td>
+
+
+                                                <td>
+                                                    <input
+                                                        type="text"
+                                                        name="contact"
+                                                        value={editData.contact}
+                                                        onChange={handleEditChange}
+                                                    />
+                                                </td>
+
+
+                                                <td>
+                                                    <input
+                                                        type="email"
+                                                        name="email"
+                                                        value={editData.email}
+                                                        onChange={handleEditChange}
+                                                    />
+                                                </td>
+
+
+                                                <td>
+                                                    <input
+                                                        type="text"
+                                                        name="address"
+                                                        value={editData.address}
+                                                        onChange={handleEditChange}
+                                                    />
+                                                </td>
+
+
+                                                <td className="supplier-actions">
+
+                                                    <button
+                                                        className="save-btn"
+                                                        onClick={() =>
+                                                            saveEdit(supplier.id)
+                                                        }
+                                                    >
+                                                        Save
+                                                    </button>
+
+
+                                                    <button
+                                                        className="cancel-btn"
+                                                        onClick={cancelEdit}
+                                                    >
+                                                        Cancel
+                                                    </button>
+
+                                                </td>
+
+                                            </>
+
+                                        ) : (
+
+                                            <>
+
+                                                <td>
+                                                    {supplier.name}
+                                                </td>
+
+                                                <td>
+                                                    {supplier.contact}
+                                                </td>
+
+                                                <td>
+                                                    {supplier.email}
+                                                </td>
+
+                                                <td>
+                                                    {supplier.address}
+                                                </td>
+
+
+                                                <td className="supplier-actions">
+
+                                                    <button
+                                                        className="edit-btn"
+                                                        onClick={() =>
+                                                            startEdit(supplier)
+                                                        }
+                                                    >
+                                                        Edit
+                                                    </button>
+
+
+                                                    <button
+                                                        className="delete-btn"
+                                                        onClick={() =>
+                                                            deleteSupplier(
+                                                                supplier.id
+                                                            )
+                                                        }
+                                                    >
+                                                        Delete
+                                                    </button>
+
+                                                </td>
+
+                                            </>
+
+                                        )}
+
+                                    </tr>
+
+                                ))}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                )}
+
+            </div>
+
+        </div>
+
+    );
 
 }
-
 
 export default Suppliers;

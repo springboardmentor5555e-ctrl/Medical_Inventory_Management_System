@@ -1,0 +1,98 @@
+.add-page{
+    min-height:100vh;
+    background:#f4f6f9;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    position:relative;
+    padding:40px;
+}
+
+.back-btn{
+    position:absolute;
+    top:30px;
+    left:30px;
+    font-size:28px;
+    cursor:pointer;
+    color:#0d6efd;
+}
+
+.add-card{
+    width:900px;
+    background:#fff;
+    padding:35px;
+    border-radius:15px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.15);
+}
+
+.add-card h2{
+    text-align:center;
+    margin-bottom:30px;
+    color:#0d6efd;
+}
+
+.form-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:20px;
+}
+
+.form-group{
+    display:flex;
+    flex-direction:column;
+}
+
+.form-group label{
+    font-weight:bold;
+    margin-bottom:8px;
+}
+
+.form-group input{
+    padding:12px;
+    border:1px solid #ccc;
+    border-radius:8px;
+    font-size:15px;
+}
+
+.button-group{
+    display:flex;
+    justify-content:center;
+    gap:20px;
+    margin-top:30px;
+}
+
+.reset-btn,
+.save-btn{
+    width:180px;
+    padding:12px;
+    border:none;
+    border-radius:8px;
+    color:white;
+    cursor:pointer;
+    font-size:16px;
+}
+
+.reset-btn{
+    background:#dc3545;
+}
+
+.save-btn{
+    background:#198754;
+}
+
+.reset-btn:hover{
+    background:#bb2d3b;
+}
+
+.save-btn:hover{
+    background:#157347;
+}
+.back-btn {
+    background: none;
+    border: none;
+    color: #1976d2;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 5px;
+}
+

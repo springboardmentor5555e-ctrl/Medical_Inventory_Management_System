@@ -2,6 +2,7 @@ import Navbar from "../components/Navbar";
 import "../styles/dashboard.css";
 import { useEffect, useState } from "react";
 import api from "../services/api";
+import { FaBell } from "react-icons/fa";
 
 function Dashboard(){
     const [dashboardData, setDashboardData] = useState({
@@ -10,9 +11,27 @@ function Dashboard(){
     goingToExpire: 0,
     expiredMedicines: 0
 });
+    const [registrationRequests, setRegistrationRequests] = useState([]);
 
-useEffect(() => {
+    const [showRegistrationNotifications, setShowRegistrationNotifications] =
+        useState(false);
+
+        useEffect(() => {
+
     loadDashboard();
+
+    loadRegistrationRequests();
+
+    const interval = setInterval(() => {
+
+        loadRegistrationRequests();
+
+    }, 10000);
+
+    return () => {
+        clearInterval(interval);
+    };
+
 }, []);
 
 const loadDashboard = async () => {
@@ -24,11 +43,141 @@ const loadDashboard = async () => {
     }
 };
 
+const loadRegistrationRequests = async () => {
+
+    try {
+
+        const response = await api.get(
+            "/admin/registration-requests"
+        );
+
+        setRegistrationRequests(response.data);
+
+    } catch (error) {
+
+        console.log(
+            "Registration request error:",
+            error
+        );
+
+    }
+};
+
+const approveRegistration = async (userId) => {
+
+    try {
+
+        await api.put(
+            `/admin/registration-requests/${userId}/approve`
+        );
+
+        alert("User approved successfully ✅");
+
+        loadRegistrationRequests();
+
+    } catch (error) {
+
+        console.log(
+            "Approval error:",
+            error
+        );
+
+        alert("Unable to approve user.");
+
+    }
+};
+
 return(
 
 <div>
 
-<Navbar/>
+<div className="admin-navbar-wrapper">
+
+    <Navbar />
+
+    <div className="registration-notification-wrapper">
+
+        <FaBell
+            className="registration-bell"
+            onClick={() =>
+                setShowRegistrationNotifications(
+                    !showRegistrationNotifications
+                )
+            }
+        />
+
+        {registrationRequests.length > 0 && (
+
+            <span className="registration-notification-count">
+                {registrationRequests.length}
+            </span>
+
+        )}
+
+    </div>
+
+
+    {showRegistrationNotifications && (
+
+        <div className="registration-notification-panel">
+
+            <h3>
+                🔔 Registration Requests
+            </h3>
+
+
+            {registrationRequests.length === 0 ? (
+
+                <p className="no-registration-request">
+                    No new registration requests.
+                </p>
+
+            ) : (
+
+                registrationRequests.map((user) => (
+
+                    <div
+                        className="registration-request"
+                        key={user.id}
+                    >
+
+                        <div className="registration-user-info">
+
+                            <strong>
+                                {user.fullName}
+                            </strong>
+
+                            <span>
+                                {user.role}
+                            </span>
+
+                            <small>
+                                {user.email}
+                            </small>
+
+                        </div>
+
+
+                        <button
+                            className="accept-registration-btn"
+                            onClick={() =>
+                                approveRegistration(user.id)
+                            }
+                        >
+                            ✓ Accept
+                        </button>
+
+                    </div>
+
+                ))
+
+            )}
+
+        </div>
+
+    )}
+
+</div>
 
 <div className="dashboard-container">
 
